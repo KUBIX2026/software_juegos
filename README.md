@@ -22,8 +22,8 @@ Este repositorio contiene:
 | Snake | [`snake`](./snake) | Prototipo funcional |
 | Space Invaders | [`space_invaders`](./space_invaders) | Prototipo |
 | Pong | [`pong`](./pong) | En pruebas |
-| Breakout | [`breakout`](./breakout) | Planeado |
-| Tetris | [`tetris`](./tetris) | En desarrollo |
+| Breakout | [`breakout`](./breakout) | En desarrollo |
+| Tetris | [`tetris`](./tetris) | Planeado |
 
 ---
 
