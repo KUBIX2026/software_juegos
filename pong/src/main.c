@@ -121,14 +121,17 @@ static void drawPanel(uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
   sendSprite(black_pixels, x, y, w, h);
 }
 
-static void drawTitle(void) { drawBig("PONG", 4); }
+// Rotulo (sprite) centrado horizontalmente.
+static void drawLabel(const uint16_t *sprite, uint8_t w, uint8_t h, uint8_t y) {
+  sendSprite(sprite, (uint8_t)((SCREEN_SIZE - w) / 2), y, w, h);
+}
 
 static void drawList(const char *const labels[], int count, int selected,
                      uint8_t first_y) {
   for (int i = 0; i < count; ++i) {
     uint8_t y = (uint8_t)(first_y + i * LINE_STEP);
     if (i == selected)
-      drawText(">", 6, y);
+      sendSprite(Cursor, 4, (uint8_t)(y - 1), Cursor_W, Cursor_H);
     drawText(labels[i], 12, y);
   }
 }
@@ -157,27 +160,29 @@ static void drawGame(const EstadoPong *e) {
 }
 
 static void drawMenu(int selected) {
-  drawTitle();
-  drawList(menu_labels, MENU_COUNT, selected, 18);
+  sendBackground(MenuPong);
+  drawList(menu_labels, MENU_COUNT, selected, 24);
 }
 
 static void drawDifficulty(int selected) {
-  drawCentered("DIFFICULTY", 6);
-  drawList(difficulty_labels, 3, selected, 22);
-  drawCentered("A: OK  B: BACK", 54);
+  sendBackground(MenuPong);
+  drawCentered("DIFFICULTY", 24);
+  drawList(difficulty_labels, 3, selected, 33);
+  drawCentered("A: OK  B: BACK", 58);
 }
 
 static void drawNeedControls(void) {
-  drawCentered("NEED 2", 20);
-  drawCentered("CONTROLLERS", 28);
-  drawCentered("B: BACK", 50);
+  sendBackground(MenuPong);
+  drawCentered("NEED 2", 30);
+  drawCentered("CONTROLLERS", 38);
+  drawCentered("B: BACK", 54);
 }
 
 static void drawReady(void) {
-  drawTitle();
-  drawCentered("PRESS START", 24);
-  drawCentered("TO PLAY", 32);
-  drawCentered("B: MENU", 50);
+  sendBackground(MenuPong);
+  drawCentered("PRESS START", 30);
+  drawCentered("TO PLAY", 38);
+  drawCentered("B: MENU", 54);
 }
 
 static void drawTutorial(void) {
@@ -206,12 +211,18 @@ static void drawScores(void) {
 static void drawGameOver(const EstadoPong *e, int made_top) {
   drawGame(e); // el marcador final queda arriba, con los digitos grandes
   drawPanel(6, 20, 52, 43);
-  if (e->modo == PONG_UN_JUGADOR)
-    drawBig(e->ganador == 1 ? "YOU WIN" : "YOU LOSE", 23);
-  else
-    drawBig(e->ganador == 1 ? "P1 WINS" : "P2 WINS", 23);
+  if (e->modo == PONG_UN_JUGADOR) {
+    if (e->ganador == 1)
+      drawLabel(LabelYouWin, LabelYouWin_W, LabelYouWin_H, 23);
+    else
+      drawLabel(LabelYouLose, LabelYouLose_W, LabelYouLose_H, 23);
+  } else if (e->ganador == 1) {
+    drawLabel(LabelP1Wins, LabelP1Wins_W, LabelP1Wins_H, 23);
+  } else {
+    drawLabel(LabelP2Wins, LabelP2Wins_W, LabelP2Wins_H, 23);
+  }
   if (made_top)
-    drawCentered("TOP 5!", 34);
+    drawCentered("NEW TOP 5", 34);
   drawCentered("START: REPLAY", 44);
   drawCentered("B: MENU", 53);
 }
@@ -353,8 +364,8 @@ int main(int argc, char *argv[]) {
       break;
     case SCREEN_PAUSE:
       drawGame(&game);
-      drawPanel(16, 26, 32, 11);
-      drawCentered("PAUSED", 29);
+      drawPanel(10, 25, 44, 13);
+      drawLabel(LabelPaused, LabelPaused_W, LabelPaused_H, 28);
       break;
     case SCREEN_GAMEOVER:
       drawGameOver(&game, made_top);

@@ -18,7 +18,9 @@ TRANSPARENTE = 0x0843
 RAIZ = Path(__file__).resolve().parent.parent
 ASSETS = RAIZ / "assets"
 SALIDA = RAIZ / "include" / "assets.h"
-ORDEN = ["Ball", "Escenario", "Player1", "Player2"] + [f"Num{i}" for i in range(10)]
+ORDEN = (["Ball", "Escenario", "Player1", "Player2"] + [f"Num{i}" for i in range(10)] +
+         ["MenuPong", "Cursor", "LabelPaused", "LabelYouWin", "LabelYouLose",
+          "LabelP1Wins", "LabelP2Wins"])
 
 
 def rgb565(r, g, b):

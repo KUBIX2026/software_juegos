@@ -646,6 +646,38 @@ static void pruebas_assets(void) {
         "assets: digitos de 9 de alto (el 1 mide 1 de ancho)");
   CHECK(sizeof(Escenario) / sizeof(Escenario[0]) == 4096,
         "assets: el escenario tiene 4096 pixeles");
+
+  /* sprites de los menus */
+  int transparentes = 0;
+  for (unsigned i = 0; i < sizeof(MenuPong) / sizeof(MenuPong[0]); i++)
+    if (MenuPong[i] == 0x0843)
+      transparentes++;
+  CHECK(MenuPong_W == 64 && MenuPong_H == 64 &&
+            sizeof(MenuPong) / sizeof(MenuPong[0]) == 4096,
+        "assets: el fondo del menu cubre los 64x64");
+  CHECK(transparentes == 0,
+        "assets: el fondo del menu es opaco (no deja ver el cuadro anterior)");
+  CHECK(Cursor_W == 5 && Cursor_H == 7, "assets: el cursor mide 5x7");
+  CHECK(LabelPaused_H == 7 && LabelYouWin_H == 7 && LabelYouLose_H == 7 &&
+            LabelP1Wins_H == 7 && LabelP2Wins_H == 7,
+        "assets: los rotulos miden 7 de alto");
+  CHECK(LabelPaused_W <= 44 && LabelYouWin_W <= 52 && LabelYouLose_W <= 52 &&
+            LabelP1Wins_W <= 52 && LabelP2Wins_W <= 52,
+        "assets: cada rotulo cabe en su panel oscuro");
+  int vacios = 0;
+  const uint16_t *rotulos[5] = {LabelPaused, LabelYouWin, LabelYouLose,
+                                LabelP1Wins, LabelP2Wins};
+  const unsigned ancho[5] = {LabelPaused_W, LabelYouWin_W, LabelYouLose_W,
+                             LabelP1Wins_W, LabelP2Wins_W};
+  for (int r = 0; r < 5; r++) {
+    int opacos = 0;
+    for (unsigned i = 0; i < ancho[r] * 7u; i++)
+      if (rotulos[r][i] != 0x0843)
+        opacos++;
+    if (opacos == 0)
+      vacios++;
+  }
+  CHECK(vacios == 0, "assets: ningun rotulo esta vacio");
 }
 
 int main(int argc, char **argv) {
