@@ -1,7 +1,3 @@
-// TODO:
-// 1. FEATURE: Add acceleration to the car.
-// 2. FEATURE: Add the gas.
-
 #include "assets.h"
 #include "hal.h"
 
@@ -71,7 +67,7 @@ static void drawGame(uint8_t player_x, uint8_t player_y,
   char time_text[16];
   char distance_text[8];
 
-  sendBackground(SimplerRoadNL);
+  sendBackground(SimplerRoad);
   sendSprite(fence_layer, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
   sendSprite(line_layer, 0, 0, SCREEN_SIZE, SCREEN_SIZE);
   for (int i = 0; i < TRAFFIC_COUNT; ++i) {
@@ -149,7 +145,12 @@ static void updateTraffic(TrafficCar traffic[], uint8_t player_x,
 }
 
 static void updatePlayer(uint8_t controls, uint8_t *x, uint8_t *y,
-                         uint8_t *speed, uint8_t *moving_forward) {
+                         uint8_t *speed, uint8_t *moving_forward,
+                         uint32_t frame_delta,
+                         uint32_t *velocity_milli,
+                         uint32_t *movement_remainder,
+                         uint32_t *velocity_sum_milli,
+                         uint8_t *frame_movement_pixels) {
   if ((controls & NES_BIT_LEFT) && !(controls & NES_BIT_RIGHT))
     *x -= player_lane_step;
   if ((controls & NES_BIT_RIGHT) && !(controls & NES_BIT_LEFT))
@@ -159,24 +160,33 @@ static void updatePlayer(uint8_t controls, uint8_t *x, uint8_t *y,
   if (*x > lane_x[LANE_COUNT - 1])
     *x = lane_x[LANE_COUNT - 1];
 
+  uint32_t previous_velocity_milli = *velocity_milli;
   if ((controls & NES_BIT_UP) && !(controls & NES_BIT_DOWN)) {
     *moving_forward = 1;
-    if (*speed < PLAYER_MAX_SPEED)
-      ++*speed;
+    uint32_t max_velocity_milli = PLAYER_MAX_SPEED * 1000;
+    *velocity_milli = *velocity_milli + frame_delta > max_velocity_milli
+                          ? max_velocity_milli
+                          : *velocity_milli + frame_delta;
   } else if ((controls & NES_BIT_DOWN) && !(controls & NES_BIT_UP)) {
-    *moving_forward = 0;
-    if (*speed < PLAYER_MAX_SPEED)
-      ++*speed;
-  } else if (*speed > 0) {
-    --*speed;
+    *moving_forward = 1;
+    *velocity_milli = *velocity_milli > frame_delta
+                          ? *velocity_milli - frame_delta
+                          : 0;
   }
 
-  if (*moving_forward)
-    *y = *y > PLAYER_MIN_Y + *speed ? (uint8_t)(*y - *speed) : PLAYER_MIN_Y;
-  else {
-    uint8_t max_y = SCREEN_SIZE - CAR_HEIGHT;
-    *y = *y + *speed < max_y ? (uint8_t)(*y + *speed) : max_y;
-  }
+  *speed = (uint8_t)((*velocity_milli + 500) / 1000);
+  *velocity_sum_milli = previous_velocity_milli + *velocity_milli;
+  uint32_t movement_numerator = *movement_remainder +
+                                (*velocity_sum_milli * frame_delta);
+  uint32_t movement_pixels = movement_numerator / 2000000;
+  *movement_remainder = movement_numerator % 2000000;
+  *frame_movement_pixels =
+      (uint8_t)(movement_pixels > UINT8_MAX ? UINT8_MAX : movement_pixels);
+  uint8_t available_up = *y > PLAYER_MIN_Y ? *y - PLAYER_MIN_Y : 0;
+  if (movement_pixels > available_up)
+    movement_pixels = available_up;
+  *y = (uint8_t)(*y - movement_pixels);
+  *moving_forward = 1;
 }
 
 int main(int argc, char *argv[]) {
@@ -188,20 +198,24 @@ int main(int argc, char *argv[]) {
   uint8_t player_y = PLAYER_Y;
   uint8_t player_speed = 0;
   uint8_t player_moving_forward = 1;
+  uint8_t frame_movement_pixels = 0;
+  uint32_t player_velocity_milli = 0;
+  uint32_t velocity_sum_milli = 0;
+  uint32_t player_movement_remainder = 0;
   unsigned collisions = 0;
   uint8_t fence_scroll = 0;
   uint8_t line_scroll = 0;
   uint8_t game_finished = 0;
   uint8_t player_crash_timer = 0;
   uint32_t player_distance_units = 0;
+  uint32_t distance_progress_remainder = 0;
   uint32_t elapsed_ms = 0;
   uint32_t last_frame_ticks = SDL_GetTicks();
   uint16_t moving_fences[SCREEN_SIZE * SCREEN_SIZE];
   uint16_t moving_lines[SCREEN_SIZE * SCREEN_SIZE];
   AppScreen current_screen = SCREEN_GAME;
 
-  // FEATURE: I don't like to create the cars as memory. I want them to be
-  // randomize.
+  // FEATURE: I want the cars to be at a random position.
   TrafficCar traffic[TRAFFIC_COUNT] = {
       {.sprite = BlueCar,
        .goal_percent = 5,
@@ -313,15 +327,15 @@ int main(int argc, char *argv[]) {
 
     switch (current_screen) {
     case SCREEN_STARTMENU:
-      if (controls & NES_BIT_START)
+      if (controls & NES_BIT_A)
         current_screen = SCREEN_GAME;
       break;
 
       break;
     case SCREEN_PAUSE:
-      if (controls & NES_BIT_START) {
+      if (controls & NES_BIT_A) {
         current_screen = SCREEN_GAME;
-      } else if (controls & NES_BIT_UP) {
+      } else if (controls & NES_BIT_B) {
         current_screen = SCREEN_STARTMENU;
       }
       break;
@@ -333,17 +347,21 @@ int main(int argc, char *argv[]) {
         if (!game_finished) {
           elapsed_ms += frame_delta;
           updatePlayer(controls, &player_x, &player_y, &player_speed,
-                       &player_moving_forward);
+                       &player_moving_forward, frame_delta,
+                       &player_velocity_milli,
+                       &player_movement_remainder,
+                       &velocity_sum_milli,
+                       &frame_movement_pixels);
           if (player_moving_forward) {
             uint32_t goal_units =
                 DISTANCE_GOAL_METERS * DISTANCE_UNITS_PER_METER;
-            player_distance_units += player_speed;
+            distance_progress_remainder +=
+                velocity_sum_milli * frame_delta *
+                DISTANCE_UNITS_PER_PIXEL;
+            player_distance_units += distance_progress_remainder / 2000000;
+            distance_progress_remainder %= 2000000;
             if (player_distance_units > goal_units)
               player_distance_units = goal_units;
-          } else if (player_distance_units >= player_speed) {
-            player_distance_units -= player_speed;
-          } else {
-            player_distance_units = 0;
           }
 
           if (player_distance_units >=
@@ -351,8 +369,8 @@ int main(int argc, char *argv[]) {
             game_finished = 1;
           }
 
-          advanceScroll(&fence_scroll, player_speed, player_moving_forward);
-          advanceScroll(&line_scroll, player_speed, player_moving_forward);
+          advanceScroll(&fence_scroll, frame_movement_pixels, 1);
+          advanceScroll(&line_scroll, frame_movement_pixels, 1);
         }
         updateTraffic(traffic, player_x, player_y, player_distance_units,
                       &collisions, &player_crash_timer, !game_finished);
@@ -372,11 +390,10 @@ int main(int argc, char *argv[]) {
 
     switch (current_screen) {
     case SCREEN_STARTMENU:
-      sendBackground(menuRoadFigther);
+      sendBackground(MainMenu);
       break;
     case SCREEN_PAUSE:
-
-      sendBackground(pauseRoadFigtherr);
+      sendBackground(PauseMenu);
       break;
     case SCREEN_GAME:
       drawGame(player_x, player_y, traffic, collisions, elapsed_ms / 1000,

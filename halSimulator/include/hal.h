@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 #define NES_BIT_RIGHT (1 << 0)
 #define NES_BIT_LEFT (1 << 1)
 #define NES_BIT_DOWN (1 << 2)
@@ -67,24 +66,25 @@ uint8_t readControls(int *running, struct keys *bindings) {
     }
   }
   const Uint8 *keystate = SDL_GetKeyboardState(NULL);
-  uint8_t serialData = 0b000000;
+  static uint8_t previousState = 0;
+  uint8_t currentState = 0;
 
   if (keystate[SDL_GetScancodeFromKey(bindings->UP)])
-    serialData |= NES_BIT_UP;
+    currentState |= NES_BIT_UP;
   if (keystate[SDL_GetScancodeFromKey(bindings->DOWN)])
-    serialData |= NES_BIT_DOWN;
+    currentState |= NES_BIT_DOWN;
   if (keystate[SDL_GetScancodeFromKey(bindings->LEFT)])
-    serialData |= NES_BIT_LEFT;
+    currentState |= NES_BIT_LEFT;
   if (keystate[SDL_GetScancodeFromKey(bindings->RIGHT)])
-    serialData |= NES_BIT_RIGHT;
+    currentState |= NES_BIT_RIGHT;
   if (keystate[SDL_GetScancodeFromKey(bindings->START)])
-    serialData |= NES_BIT_START;
+    currentState |= NES_BIT_START;
   if (keystate[SDL_GetScancodeFromKey(bindings->A)])
-    serialData |= NES_BIT_A;
+    currentState |= NES_BIT_A;
   if (keystate[SDL_GetScancodeFromKey(bindings->B)])
-    serialData |= NES_BIT_B;
+    currentState |= NES_BIT_B;
 
-  return serialData;
+  return currentState;
 };
 
 struct rgb hex2rgb(uint16_t hexColor) {
@@ -140,22 +140,36 @@ void sendLetter(char s, uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
   }
 
   int font_index = (s - 32) * w;
-  uint16_t sprite_buffer[35];
+  uint16_t sprite_buffer[40];
 
-  for (uint8_t col = 0; col < w; col++) {
-    uint8_t column_data = usg_font_5x7[font_index + col];
-    for (uint8_t row = 0; row < h; row++) {
+  if (w == 5) {
+    for (uint8_t col = 0; col < w; col++) {
+      uint8_t column_data = usg_font_5x7[font_index + col];
+      for (uint8_t row = 0; row < h; row++) {
 
-      int bit = (column_data >> row) & 1;
+        int bit = (column_data >> row) & 1;
 
-      sprite_buffer[row * w + col] = bit ? 0xFFF : 0x0843;
+        sprite_buffer[row * w + col] = bit ? 0xFFF : 0x0843;
+      }
+    }
+
+  } else if (w == 3) {
+    for (uint8_t col = 0; col < w; col++) {
+      uint8_t column_data = usg_font_3x5[font_index + col];
+      for (uint8_t row = 0; row < h; row++) {
+
+        int bit = (column_data >> row) & 1;
+
+        sprite_buffer[row * w + col] = bit ? 0xFFFF : 0x0843;
+      }
     }
   }
+
   sendSprite(sprite_buffer, x, y, w, h);
 }
 
 void sendString(char *string, uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
-  uint8_t text_spacing = 2;
+  uint8_t text_spacing = 1;
   int len = strlen(string);
   for (uint8_t i = 0; i < len; i++) {
     sendLetter(string[i], x + (i * (w + text_spacing)), y, w, h);
@@ -303,6 +317,19 @@ void playSound(SoundID audio_id) {
 #endif
 
 #ifdef FPGA
+#define BRAM_BASE 0x000000
+#define UART_BASE 0x400000
+#define KBD_BASE 0x430000
+#define MOUSE_BASE 0x440000
+#define NES_CTRL_BASE 0x450000
+#define I2S_BASE 0x470000
+#define DISPLAY_FB_BASE 0x480000
+
+#define HW_NES_CTRL ((volatile uint32_t *)NES_CTRL_BASE)
+#define HW_DISPLAY_FB ((volatile uint16_t *)DISPLAY_FB_BASE)
+#define HW_I2S_AUDIO ((volatile uint32_t *)I2S_BASE)
+
+#define SCREEN_WIDTH 512
 
 void sendSprite(const uint16_t *spriteAddress, uint8_t x, uint8_t y, uint8_t w,
                 uint8_t h) {
@@ -322,19 +349,12 @@ void sendBackground(const uint16_t *spriteAddress) {
 typedef enum { KEYBOARD, MOUSE, NESS } controller;
 
 Action readControls(controller controller) {
-  // FEATURE: Maybe another parameter on the function to look for each player.
-  switch (controller) {
-  case KEYBOARD:
-    // return readFromDirection();
-    break;
-  case MOUSE:
-    // return readFromDirection();
-    break;
-  case NESS:
-    // return readFromDirection();
-    break;
-  }
-  return ACTION_NONE;
+  (void)running;
+  (void)bindings;
+
+  uint8_t current_state = (uint8_t)(*HW_NES_CTRL & 0xFF);
+
+  return current_state;
 };
 
 // SoundID initSound(const char *filepath) {
