@@ -40,7 +40,8 @@ enum {
   LINE_STEP = 8,
   SCORE_X_LEFT = 26,  // borde derecho del digito del jugador izquierdo
   SCORE_X_RIGHT = 36, // borde izquierdo del digito del jugador derecho
-  SCORE_Y = 3
+  SCORE_Y = 3,
+  GAMEOVER_WAIT = 40 // cuadros sin aceptar botones al terminar (unos 1,2 s)
 };
 
 static const char *const menu_labels[MENU_COUNT] = {
@@ -241,6 +242,7 @@ int main(int argc, char *argv[]) {
   ModoPong mode = PONG_UN_JUGADOR;
   int made_top = 0;
   uint8_t previous_p1 = 0;
+  int gameover_wait = 0;
   EstadoPong game;
   pong_inicializar(&game, SDL_GetTicks(), mode, PONG_IA_NORMAL);
 
@@ -322,6 +324,7 @@ int main(int argc, char *argv[]) {
         playEvents(game.eventos);
         if (game.juego_terminado) {
           made_top = mode == PONG_UN_JUGADOR && pong_registrar_puntaje(best_scores, pong_puntaje(&game));
+          gameover_wait = GAMEOVER_WAIT;
           screen = SCREEN_GAMEOVER;
         }
       }
@@ -335,7 +338,11 @@ int main(int argc, char *argv[]) {
       break;
 
     case SCREEN_GAMEOVER:
-      if (pressed & NES_BIT_START) {
+      // Un momento sin aceptar botones: si el jugador estaba pulsando Start al
+      // terminar, no se salta de golpe la pantalla del resultado.
+      if (gameover_wait > 0) {
+        --gameover_wait;
+      } else if (pressed & NES_BIT_START) {
         pong_inicializar(&game, SDL_GetTicks(), mode,
                          (NivelIA)difficulty_selected);
         screen = SCREEN_GAME;

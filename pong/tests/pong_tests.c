@@ -154,7 +154,7 @@ static void pruebas_paletas(void) {
   CHECK(e.paleta_izq_y == PONG_ALTO - PONG_PALETA_IZQ_ALTO,
         "limite inferior izquierda usa el alto real (10)");
   CHECK(e.paleta_der_y == PONG_ALTO - PONG_PALETA_DER_ALTO,
-        "limite inferior derecha usa el alto real (9)");
+        "limite inferior derecha usa el alto real (10)");
 
   EstadoPong u = nuevo(PONG_UN_JUGADOR, PONG_IA_NORMAL);
   EstadoPong v = nuevo(PONG_UN_JUGADOR, PONG_IA_NORMAL);
@@ -251,16 +251,195 @@ static void pruebas_golpe_paleta_derecha(void) {
   CHECK(e.golpes == 1, "golpe derecho: cuenta un golpe");
   CHECK(e.pelota_x16 <= 928, "golpe derecho: la pelota sale de la paleta");
 
-  /* alto 9: pos = by + 1 - 30 */
+  /* alto 10, igual que la izquierda: pos = by + 1 - 30 */
   CHECK(cerca(golpe_der(29, 0).pelota_vy, -20), "derecha zona 0");
-  CHECK(cerca(golpe_der(32, 0).pelota_vy, -10), "derecha zona 1");
-  CHECK(golpe_der(33, 0).pelota_vy == 0, "derecha zona 2 (centro), sin variacion");
-  CHECK(cerca(golpe_der(35, 0).pelota_vy, 10), "derecha zona 3");
-  CHECK(cerca(golpe_der(38, 0).pelota_vy, 20), "derecha zona 4");
+  CHECK(cerca(golpe_der(31, 0).pelota_vy, -10), "derecha zona 1");
+  CHECK(golpe_der(34, 0).pelota_vy == 0, "derecha zona 2 (centro), sin variacion");
+  CHECK(cerca(golpe_der(37, 0).pelota_vy, 10), "derecha zona 3");
+  CHECK(cerca(golpe_der(39, 0).pelota_vy, 20), "derecha zona 4");
   CHECK(golpe_der(29, 0).eventos & PONG_EVT_PALETA, "derecha: borde superior toca");
   CHECK(!(golpe_der(28, 0).eventos & PONG_EVT_PALETA), "derecha: justo arriba no toca");
-  CHECK(golpe_der(38, 0).eventos & PONG_EVT_PALETA, "derecha: borde inferior toca (alto 9)");
-  CHECK(!(golpe_der(39, 0).eventos & PONG_EVT_PALETA), "derecha: justo abajo no toca");
+  CHECK(golpe_der(39, 0).eventos & PONG_EVT_PALETA, "derecha: borde inferior toca (alto 10)");
+  CHECK(!(golpe_der(40, 0).eventos & PONG_EVT_PALETA), "derecha: justo abajo no toca");
+}
+
+/* Zona esperada (0..4) segun donde cae el centro de la pelota sobre una paleta de 10. */
+static int zona_esperada(int pos) {
+  if (pos <= 1)
+    return 0;
+  if (pos <= 3)
+    return 1;
+  if (pos <= 6)
+    return 2;
+  if (pos <= 8)
+    return 3;
+  return 4;
+}
+
+/* Valores de vy que aparecen en un golpe, probando muchas semillas (la variacion
+ * es aleatoria): devuelve una mascara con vy - base + 8 (para vy - base en -8..7). */
+static unsigned vy_posibles(int izquierda, int by, int base) {
+  unsigned m = 0;
+  for (uint32_t semilla = 1; semilla <= 200; semilla++) {
+    EstadoPong e = cancha();
+    e.prng_estado = semilla * 2654435761u + 1u;
+    e.paleta_izq_y = 30;
+    e.paleta_der_y = 30;
+    if (izquierda)
+      poner(&e, 70, by, -16, 0);
+    else
+      poner(&e, 920, by, 16, 0);
+    paso(&e);
+    int d = e.pelota_vy - base;
+    if (d >= -8 && d < 8)
+      m |= 1u << (d + 8);
+  }
+  return m;
+}
+
+static void pruebas_zonas_y_angulos(void) {
+  int zonas_ok = 1, centro_exacto = 1;
+  const int base[5] = {-20, -10, 0, 10, 20};
+  for (int by = 29; by <= 39; by++) {
+    int pos = by + 1 - 30;
+    int z = zona_esperada(pos);
+    for (int lado = 0; lado < 2; lado++) {
+      unsigned m = vy_posibles(lado == 0, by, base[z]);
+      unsigned esperado = z == 2 ? (1u << 8) : ((1u << 6) | (1u << 7) | (1u << 9) | (1u << 10));
+      if (m != esperado)
+        zonas_ok = 0;
+      if (z == 2 && m != (1u << 8))
+        centro_exacto = 0;
+    }
+  }
+  CHECK(zonas_ok, "zonas: cada una de las 11 posiciones de la paleta da su angulo (+-1 o +-2 de variacion) en las dos paletas");
+  CHECK(centro_exacto, "zonas: el centro de la paleta devuelve la pelota recta, sin variacion");
+
+  int niveles_ok = 1;
+  const int vy_borde[4] = {20, 24, 30, 36};
+  for (int nivel = 0; nivel < 4; nivel++) {
+    unsigned m = 0;
+    for (uint32_t semilla = 1; semilla <= 200; semilla++) {
+      EstadoPong e = cancha();
+      e.prng_estado = semilla * 2654435761u + 1u;
+      e.paleta_izq_y = 30;
+      e.golpes = (uint8_t)(nivel * PONG_GOLPES_POR_NIVEL - 1 + (nivel == 0 ? 1 : 0));
+      poner(&e, 70, 39, -16, 0); /* borde inferior */
+      paso(&e);
+      int d = e.pelota_vy - vy_borde[nivel];
+      if (d >= -8 && d < 8)
+        m |= 1u << (d + 8);
+    }
+    if (m != ((1u << 6) | (1u << 7) | (1u << 9) | (1u << 10)))
+      niveles_ok = 0;
+  }
+  CHECK(niveles_ok, "angulos: el borde da 20, 24, 30 y 36 segun el nivel de velocidad");
+}
+
+/* La pelota justo en un borde: ni un cuadro antes ni uno despues. */
+static void pruebas_bordes_exactos(void) {
+  EstadoPong p = cancha();
+  poner(&p, 30 * 16, 61, 16, 16); /* queda con y = 62 exacto: tocando el piso, aun dentro */
+  paso(&p);
+  CHECK(p.pelota_y16 == 62 * 16 && p.pelota_vy == 16 && !(p.eventos & PONG_EVT_PARED),
+        "bordes: la pelota apoyada exactamente en el piso todavia no rebota");
+  paso(&p);
+  CHECK(p.pelota_vy == -16 && (p.eventos & PONG_EVT_PARED), "bordes: al pasarse del piso rebota");
+  EstadoPong t = cancha();
+  poner(&t, 30 * 16, 1, 16, -16); /* queda con y = 0 exacto */
+  paso(&t);
+  CHECK(t.pelota_y16 == 0 && t.pelota_vy == -16 && !(t.eventos & PONG_EVT_PARED),
+        "bordes: la pelota apoyada exactamente en el techo todavia no rebota");
+  paso(&t);
+  CHECK(t.pelota_vy == 16 && (t.eventos & PONG_EVT_PARED), "bordes: al pasarse del techo rebota");
+
+  /* paleta izquierda: pelota que queda justo pegada (x = 4) no toca; una mas adentro, si */
+  EstadoPong a = cancha();
+  a.paleta_izq_y = 30;
+  poner(&a, 80, 34, -16, 0); /* queda en x16 = 64 */
+  paso(&a);
+  CHECK(!(a.eventos & PONG_EVT_PALETA) && a.pelota_vx < 0 && a.pelota_x16 == 64,
+        "bordes: pelota pegada a la paleta izquierda sin solapar no rebota todavia");
+  EstadoPong a2 = cancha();
+  a2.paleta_izq_y = 30;
+  poner(&a2, 79, 34, -16, 0); /* queda en x16 = 63 */
+  paso(&a2);
+  CHECK(a2.eventos & PONG_EVT_PALETA, "bordes: un subpixel adentro de la paleta izquierda ya rebota");
+  EstadoPong b = cancha();
+  b.paleta_der_y = 30;
+  poner(&b, 912, 34, 16, 0); /* queda en x16 = 928 */
+  paso(&b);
+  CHECK(!(b.eventos & PONG_EVT_PALETA) && b.pelota_vx > 0 && b.pelota_x16 == 928,
+        "bordes: pelota pegada a la paleta derecha sin solapar no rebota todavia");
+  EstadoPong b2 = cancha();
+  b2.paleta_der_y = 30;
+  poner(&b2, 913, 34, 16, 0); /* queda en x16 = 929 */
+  paso(&b2);
+  CHECK(b2.eventos & PONG_EVT_PALETA, "bordes: un subpixel adentro de la paleta derecha ya rebota");
+
+  /* punto: en cuanto la pelota llega al borde del campo */
+  EstadoPong l = cancha();
+  l.paleta_izq_y = 0;
+  poner(&l, 16, 40, -16, 0); /* queda en x16 = 0 */
+  paso(&l);
+  CHECK(l.puntos_der == 1, "bordes: la pelota que llega a x = 0 es punto de inmediato");
+  EstadoPong r = cancha();
+  r.paleta_der_y = 0;
+  poner(&r, 976, 40, 16, 0); /* queda en x16 = 992 */
+  paso(&r);
+  CHECK(r.puntos_izq == 1, "bordes: la pelota que llega a x = 62 es punto de inmediato");
+  EstadoPong l2 = cancha();
+  l2.paleta_izq_y = 0;
+  poner(&l2, 17, 40, -16, 0); /* queda en x16 = 1: todavia en juego */
+  paso(&l2);
+  CHECK(l2.puntos_der == 0, "bordes: un subpixel antes del borde todavia no es punto");
+}
+
+/* Cada cuanto mira la pelota la IA (su tiempo de reaccion) segun la dificultad. */
+static void pruebas_reaccion_ia(void) {
+  int mira_en[3];
+  for (int n = 0; n < 3; n++) {
+    EstadoPong e = nuevo(PONG_UN_JUGADOR, (NivelIA)n);
+    e.espera_saque = 0;
+    e.ia_error = 0;
+    e.ia_objetivo = 27;
+    int primera = -1;
+    for (int i = 1; i <= 8 && primera < 0; i++) {
+      poner(&e, 20 * 16, 60, 16, 0); /* la pelota viene, abajo */
+      paso(&e);
+      if (e.ia_objetivo != 27)
+        primera = i;
+    }
+    mira_en[n] = primera;
+  }
+  CHECK(mira_en[2] == 1, "reaccion: la IA dificil mira la pelota en cada cuadro");
+  CHECK(mira_en[1] == 2, "reaccion: la IA normal mira la pelota cada 2 cuadros");
+  CHECK(mira_en[0] == 4, "reaccion: la IA facil mira la pelota cada 4 cuadros");
+}
+
+/* Justicia entre jugadores: las dos paletas son iguales y se comportan como espejo. */
+static void pruebas_justicia(void) {
+  CHECK(PONG_PALETA_IZQ_ALTO == PONG_PALETA_DER_ALTO, "justicia: las dos paletas miden lo mismo");
+  CHECK(PONG_PALETA_IZQ_X + PONG_PALETA_ANCHO == PONG_ANCHO - PONG_PALETA_DER_X,
+        "justicia: las dos paletas estan a la misma distancia de su pared");
+  int difiere_golpe = 0, difiere_zona = 0;
+  for (int py = 0; py <= PONG_ALTO - PONG_PALETA_IZQ_ALTO; py += 3)
+    for (int by = 0; by <= PONG_ALTO - PONG_PELOTA_LADO; by++) {
+      EstadoPong a = cancha(), b = cancha();
+      a.paleta_izq_y = (int16_t)py;
+      b.paleta_der_y = (int16_t)py;
+      poner(&a, 70, by, -16, 0);
+      poner(&b, 920, by, 16, 0);
+      paso(&a);
+      paso(&b);
+      int ha = (a.eventos & PONG_EVT_PALETA) != 0, hb = (b.eventos & PONG_EVT_PALETA) != 0;
+      if (ha != hb)
+        difiere_golpe++;
+      if (ha && hb && !cerca(a.pelota_vy, b.pelota_vy))
+        difiere_zona++;
+    }
+  CHECK(difiere_golpe == 0, "justicia: la pelota toca la paleta izquierda y la derecha exactamente en las mismas posiciones");
+  CHECK(difiere_zona == 0, "justicia: cada zona da el mismo angulo en las dos paletas");
 }
 
 static void pruebas_sin_tunel_y_pelota_pasada(void) {
@@ -398,8 +577,8 @@ static void pruebas_ia(void) {
   EstadoPong e = nuevo(PONG_UN_JUGADOR, PONG_IA_NORMAL);
   e.espera_saque = 0;
   e.paleta_der_y = 0;
-  poner(&e, 40 * 16, 30, -16, 0);
-  for (int i = 0; i < 30; i++)
+  poner(&e, 60 * 16, 30, -16, 0);
+  for (int i = 0; i < 45; i++)
     paso(&e);
   CHECK(e.paleta_der_y == 27, "IA normal: vuelve al centro si la pelota se aleja");
 
@@ -431,8 +610,25 @@ static void pruebas_ia(void) {
     }
   }
   CHECK(maximo[0] == 1, "IA facil: mueve 1 px a la vez");
-  CHECK(maximo[1] == 1, "IA normal: mueve 1 px por cuadro");
+  CHECK(maximo[1] == 1, "IA normal: mueve 1 px a la vez");
   CHECK(maximo[2] == 2, "IA dificil: mueve hasta 2 px por cuadro");
+
+  /* recorrido en 24 cuadros hacia una pelota que viene abajo: facil < normal < dificil */
+  int recorrido[3];
+  for (int n = 0; n < 3; n++) {
+    EstadoPong t = nuevo(PONG_UN_JUGADOR, (NivelIA)n);
+    t.espera_saque = 0;
+    t.paleta_der_y = 0;
+    for (int i = 0; i < 24; i++) {
+      poner(&t, 20 * 16, 60, 16, 0);
+      paso(&t);
+    }
+    recorrido[n] = t.paleta_der_y;
+  }
+  CHECK(recorrido[0] >= 8 && recorrido[0] <= 14, "IA facil: unos 0,5 px por cuadro");
+  CHECK(recorrido[1] >= 14 && recorrido[1] <= 22, "IA normal: unos 0,75 px por cuadro");
+  CHECK(recorrido[2] >= 24 && recorrido[2] <= 30, "IA dificil: poco mas de 1 px por cuadro (menos que la paleta del jugador)");
+  CHECK(recorrido[2] < 24 * PONG_PALETA_VELOCIDAD, "IA dificil: es mas lenta que el jugador, asi que se le puede ganar");
 
   EstadoPong f = nuevo(PONG_UN_JUGADOR, PONG_IA_FACIL);
   f.espera_saque = 0;
@@ -531,6 +727,36 @@ static void pruebas_jugabilidad(void) {
   }
   CHECK(puntos_ia_vistos == e.puntos_izq + e.puntos_der,
         "cada punto del marcador viene con un evento");
+}
+
+/* Equilibrio: cuanto gana una persona segun su precision (error al estimar la
+ * trayectoria) contra cada dificultad. */
+static int persona_gana(NivelIA nivel, int ruido, int partidas) {
+  int gana = 0;
+  for (int s = 1; s <= partidas; s++) {
+    EstadoPong e;
+    pong_inicializar(&e, (uint32_t)s * 7919u, PONG_UN_JUGADOR, nivel);
+    BotPersona p = {32, 0, 4, ruido, (uint32_t)s * 2654435761u + 1u};
+    for (int t = 0; t < 100000 && !e.juego_terminado; t++)
+      pong_actualizar(&e, bot_persona(&p, &e), PONG_ACCION_NINGUNA);
+    if (e.ganador == 1)
+      gana++;
+  }
+  return gana;
+}
+
+static void pruebas_equilibrio(void) {
+  const int n = 150;
+  int f3 = persona_gana(PONG_IA_FACIL, 3, n);
+  int n3 = persona_gana(PONG_IA_NORMAL, 3, n);
+  int d3 = persona_gana(PONG_IA_DIFICIL, 3, n);
+  int d1 = persona_gana(PONG_IA_DIFICIL, 1, n);
+  int d5 = persona_gana(PONG_IA_DIFICIL, 5, n);
+  CHECK(f3 >= n * 88 / 100, "equilibrio: con 3 px de error se gana casi siempre a la IA facil");
+  CHECK(n3 >= n * 60 / 100 && n3 <= n * 92 / 100, "equilibrio: con 3 px de error se gana a la IA normal la mayoria de las veces, no siempre");
+  CHECK(d3 >= n * 5 / 100 && d3 <= n * 35 / 100, "equilibrio: con 3 px de error a la IA dificil se le gana a veces (5 a 35 %)");
+  CHECK(d1 >= n * 70 / 100, "equilibrio: con 1 px de error (muy preciso) se le gana casi siempre a la dificil (70 % o mas)");
+  CHECK(d5 < d3, "equilibrio: a mas error, menos victorias contra la dificil");
 }
 
 static void pruebas_dos_jugadores(void) {
@@ -688,11 +914,16 @@ int main(int argc, char **argv) {
   pruebas_paredes();
   pruebas_golpe_paleta_izquierda();
   pruebas_golpe_paleta_derecha();
+  pruebas_justicia();
+  pruebas_zonas_y_angulos();
+  pruebas_bordes_exactos();
+  pruebas_reaccion_ia();
   pruebas_sin_tunel_y_pelota_pasada();
   pruebas_aceleracion();
   pruebas_puntos_y_fin();
   pruebas_ia();
   pruebas_jugabilidad();
+  pruebas_equilibrio();
   pruebas_dos_jugadores();
   pruebas_fuzz();
   pruebas_puntajes();

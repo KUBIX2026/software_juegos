@@ -10,7 +10,7 @@ enum {
   PONG_PUNTOS_PARA_GANAR = 7,
   PONG_PALETA_ANCHO = 2,
   PONG_PALETA_IZQ_ALTO = 10,
-  PONG_PALETA_DER_ALTO = 9,
+  PONG_PALETA_DER_ALTO = 10,
   PONG_PALETA_IZQ_X = 2,
   PONG_PALETA_DER_X = 60,
   PONG_PALETA_VELOCIDAD = 2,
@@ -59,6 +59,7 @@ typedef struct {
   uint8_t ia_tick;
   int8_t ia_error;
   int16_t ia_objetivo; /* y (pixeles) a la que la IA quiere llevar su paleta */
+  uint8_t ia_acum;     /* fraccion de pixel acumulada (1/16) de la velocidad de la IA */
   uint32_t prng_estado;
 } EstadoPong;
 

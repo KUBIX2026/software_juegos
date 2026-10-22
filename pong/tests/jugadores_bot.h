@@ -55,3 +55,36 @@ static inline AccionPong bot_apunta(const EstadoPong *e) {
     return PONG_ACCION_ARRIBA;
   return PONG_ACCION_NINGUNA;
 }
+
+/* Jugador que predice donde caera la pelota, como una persona con practica, pero
+ * con error en la estimacion (+-ruido px) y reaccion lenta (decide cada `cada`
+ * cuadros) y que apunta a los bordes de su paleta. Sirve para medir el equilibrio
+ * de las dificultades. */
+typedef struct {
+  int objetivo, tic, cada, ruido;
+  uint32_t r;
+} BotPersona;
+
+static inline int bot_persona_ruido(BotPersona *b) {
+  b->r ^= b->r << 13;
+  b->r ^= b->r >> 17;
+  b->r ^= b->r << 5;
+  return (int)((b->r >> 8) % (uint32_t)(2 * b->ruido + 1)) - b->ruido;
+}
+
+static inline AccionPong bot_persona(BotPersona *b, const EstadoPong *e) {
+  int centro = e->paleta_izq_y + PONG_PALETA_IZQ_ALTO / 2;
+  b->tic++;
+  if (e->pelota_vx >= 0 || e->espera_saque) {
+    b->objetivo = 32;
+  } else if (b->tic % b->cada == 0) {
+    int ia = e->paleta_der_y + PONG_PALETA_DER_ALTO / 2;
+    int pos = ia < 32 ? PONG_PALETA_IZQ_ALTO - 1 : 0;
+    b->objetivo = bot_prediccion_y(e) - pos + PONG_PALETA_IZQ_ALTO / 2 + bot_persona_ruido(b);
+  }
+  if (centro < b->objetivo - 1)
+    return PONG_ACCION_ABAJO;
+  if (centro > b->objetivo + 1)
+    return PONG_ACCION_ARRIBA;
+  return PONG_ACCION_NINGUNA;
+}

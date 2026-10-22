@@ -5,7 +5,8 @@ Uso (desde cualquier carpeta):
     python tools/png2assets.py
 
 Formato igual al de roadFighter: arreglos `const uint16_t Nombre[ancho*alto]`.
-El pixel transparente se escribe como 0x0843, el color que sendSprite() omite.
+El pixel transparente (alfa < 128, o el color opaco #0F081F de la convencion del
+repositorio) se escribe como 0x0843, el color que sendSprite() omite.
 Ademas se emiten las macros Nombre_W y Nombre_H con el tamano de cada sprite.
 Requiere Pillow (pip install pillow).
 """
@@ -37,10 +38,9 @@ def convertir(png):
             if a < 128:
                 pixeles.append(TRANSPARENTE)
                 continue
-            v = rgb565(r, g, b)
-            if v == TRANSPARENTE:  # que un color real no se confunda con transparente
-                v = TRANSPARENTE - 1
-            pixeles.append(v)
+            # Un pixel opaco #0F081F tambien da 0x0843: es el color transparente
+            # que define la convencion de assets del repositorio (issue #2).
+            pixeles.append(rgb565(r, g, b))
     return ancho, alto, pixeles
 
 

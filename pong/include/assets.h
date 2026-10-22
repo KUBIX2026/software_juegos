@@ -94,8 +94,9 @@ const uint16_t Player1[20] = {
 };
 
 #define Player2_W 2
-#define Player2_H 9
-const uint16_t Player2[18] = {
+#define Player2_H 10
+const uint16_t Player2[20] = {
+    0xFC5B, 0xFC5B,
     0xFC5B, 0xFC5B,
     0xFC5B, 0xFC5B,
     0xFC5B, 0xFC5B,

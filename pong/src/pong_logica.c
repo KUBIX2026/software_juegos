@@ -18,9 +18,9 @@ static const int16_t VY_ZONA[PONG_NIVELES_VEL][5] = {
     {-30, -15, 0, 15, 30},
     {-36, -18, 0, 18, 36}};
 
-/* Zona (0..4) segun donde cae el centro de la pelota respecto a la paleta. */
+/* Zona (0..4) segun donde cae el centro de la pelota respecto a la paleta
+ * (las dos paletas miden 10). */
 static const uint8_t ZONA_ALTO10[11] = {0, 0, 1, 1, 2, 2, 2, 3, 3, 4, 4};
-static const uint8_t ZONA_ALTO9[10] = {0, 0, 1, 1, 2, 2, 3, 3, 4, 4};
 
 static const int16_t SAQUE_VY[4] = {-8, -4, 4, 8};
 
@@ -28,15 +28,17 @@ static const int16_t SAQUE_VY[4] = {-8, -4, 4, 8};
  * repetir el mismo recorrido para siempre. El centro de la paleta no varia. */
 static const int16_t VY_VARIACION[4] = {-2, -1, 1, 2};
 
-/* IA: mascaras de cuadros en que mira la pelota y en que mueve la paleta. */
+/* IA: mascara de cuadros en que mira la pelota y velocidad maxima de la paleta
+ * en 1/16 de pixel por cuadro (0,5 / 0,75 / 1,125 pixeles por cuadro; la paleta
+ * del jugador va a 2). Calibrado con jugadores automaticos que predicen la
+ * trayectoria con un error de estimacion (ver tests/pong_tests.c). */
 static const uint8_t IA_MASCARA_MIRA[3] = {3, 1, 0};
-static const uint8_t IA_MASCARA_MUEVE[3] = {1, 0, 0};
-static const int8_t IA_PASO[3] = {1, 1, 2};
+static const uint8_t IA_VEL16[3] = {8, 12, 18};
 enum { IA_GOLPES_CANSANCIO = 13 };
 static const int8_t IA_ERROR[3][16] = {
-    {-8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7},
-    {-6, -5, -4, -3, -3, -2, -1, 0, 0, 1, 2, 3, 3, 4, 5, 6},
-    {-2, -2, -1, -1, -1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2}};
+    {-12, -11, -9, -8, -7, -5, -3, -1, 0, 1, 3, 5, 7, 8, 10, 11},
+    {-9, -8, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 6, 7, 9},
+    {-3, -3, -2, -2, -1, -1, 0, 0, 0, 0, 1, 1, 2, 2, 3, 3}};
 
 static uint32_t pong_rand(EstadoPong *e) {
   uint32_t x = e->prng_estado;
@@ -140,13 +142,14 @@ static void ia_mover(EstadoPong *e) {
       e->ia_objetivo = (int16_t)((PONG_ALTO - alto) / 2);
     }
   }
-  if (e->ia_tick & IA_MASCARA_MUEVE[n])
-    return;
+  e->ia_acum = (uint8_t)(e->ia_acum + IA_VEL16[n]);
+  int16_t paso = (int16_t)(e->ia_acum >> 4); /* pixeles enteros de este cuadro */
+  e->ia_acum = (uint8_t)(e->ia_acum & 15);
   int16_t d = (int16_t)(e->ia_objetivo - e->paleta_der_y);
-  if (d > IA_PASO[n])
-    d = IA_PASO[n];
-  else if (d < -IA_PASO[n])
-    d = (int16_t)-IA_PASO[n];
+  if (d > paso)
+    d = paso;
+  else if (d < -paso)
+    d = (int16_t)-paso;
   e->paleta_der_y = limitar_paleta((int16_t)(e->paleta_der_y + d), alto);
 }
 
@@ -170,9 +173,9 @@ static void punto(EstadoPong *e, uint8_t anota_izq) {
   sacar(e, (uint8_t)!anota_izq);
 }
 
-static uint8_t zona_golpe(int16_t pelota_y, int16_t paleta_y, int16_t alto) {
+static uint8_t zona_golpe(int16_t pelota_y, int16_t paleta_y) {
   int16_t pos = (int16_t)(pelota_y + PONG_PELOTA_LADO / 2 - paleta_y);
-  return alto == PONG_PALETA_IZQ_ALTO ? ZONA_ALTO10[pos] : ZONA_ALTO9[pos];
+  return ZONA_ALTO10[pos];
 }
 
 static int hay_solape(int16_t pelota_y, int16_t paleta_y, int16_t alto) {
@@ -203,7 +206,7 @@ static void mover_pelota(EstadoPong *e) {
 
   if (e->pelota_vx < 0 && e->pelota_x16 >= PLANO_IZQ16 && nx < PLANO_IZQ16 &&
       hay_solape(py, e->paleta_izq_y, PONG_PALETA_IZQ_ALTO)) {
-    uint8_t zona = zona_golpe(py, e->paleta_izq_y, PONG_PALETA_IZQ_ALTO);
+    uint8_t zona = zona_golpe(py, e->paleta_izq_y);
     if (e->golpes < 255)
       e->golpes++;
     uint8_t n = pong_nivel_velocidad(e);
@@ -215,7 +218,7 @@ static void mover_pelota(EstadoPong *e) {
   } else if (e->pelota_vx > 0 && e->pelota_x16 <= PLANO_DER16 &&
              nx > PLANO_DER16 &&
              hay_solape(py, e->paleta_der_y, PONG_PALETA_DER_ALTO)) {
-    uint8_t zona = zona_golpe(py, e->paleta_der_y, PONG_PALETA_DER_ALTO);
+    uint8_t zona = zona_golpe(py, e->paleta_der_y);
     if (e->golpes < 255)
       e->golpes++;
     uint8_t n = pong_nivel_velocidad(e);

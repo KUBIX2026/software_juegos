@@ -111,7 +111,8 @@ Actualmente, el juego cuenta con:
 - Cada golpe en la paleta divide su altura en 5 zonas: el centro devuelve la pelota recta y los bordes le dan más ángulo.
 - Cada 3 golpes seguidos la pelota sube de velocidad, hasta 4 niveles. Al marcar un punto vuelve a la velocidad inicial.
 - La CPU se equivoca a propósito. Si el intercambio se alarga, sus errores crecen, así que ningún punto dura para siempre.
-- Las paletas miden lo mismo que sus sprites: 2×10 la izquierda y 2×9 la derecha.
+- La velocidad de la paleta de la CPU es menor que la del jugador (que se mueve 2 píxeles por cuadro): 0,5 en Easy, 0,75 en Normal y poco más de 1 en Hard. Por eso siempre se le puede ganar apuntando a los bordes de la paleta.
+- Las dos paletas miden lo mismo (2×10 píxeles) y están a la misma distancia de su pared, para que el modo de dos jugadores sea justo.
 
 ## Estructura de carpetas del juego
 
@@ -195,7 +196,15 @@ gcc -Wall -Wextra -Wconversion -Iinclude -o pong_tests tests/pong_tests.c src/po
 ./pong_tests
 ```
 
-Incluyen colisiones en los bordes exactos de las paletas, la aceleración, el marcador, la CPU, partidas completas con jugadores automáticos y miles de partidas con entradas al azar.
+Son 180 pruebas y cubren el 100 % de las líneas de la lógica. Incluyen:
+
+- Colisiones con las paletas y las paredes en los bordes exactos, un subpíxel antes y un subpíxel después.
+- Los 5 ángulos de rebote en las dos paletas, y que las dos paletas se comporten como espejo.
+- La aceleración, el marcador, los puntajes y el fin de partida.
+- La velocidad y el tiempo de reacción de la CPU en cada dificultad.
+- Partidas completas con jugadores automáticos y miles de partidas con entradas al azar.
+- El equilibrio de las dificultades: un jugador que predice la trayectoria con 3 píxeles de error gana casi siempre en Easy, casi 8 de cada 10 en Normal y alrededor de 15 de cada 100 en Hard.
+- Errores inyectados a propósito en la lógica (por ejemplo, un `>` por `>=` o un signo cambiado): las pruebas detectan 37 de 37.
 
 ## Assets
 
