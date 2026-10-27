@@ -4,6 +4,10 @@ Snake es uno de los juegos más clásicos de los arcades y de los primeros telé
 
 En esta versión para KUBIX el jugador guía la serpiente con el control, debe evitar chocar con su propio cuerpo y, en el modo de dos jugadores, también con la serpiente rival.
 
+|  | |
+| :---: | :---: |
+| <img alt="Snake" src="./img/juego.png" width="300"/> | <img alt="Demostración de Snake" src="./img/snake_demo.gif" width="300"/> |
+
 ## Características del juego
 
 - Modo de 1 jugador y modo de 2 jugadores en la misma consola.
@@ -43,9 +47,17 @@ En la pausa, **A** (o Enter) reanuda y **B** vuelve al menú. La tecla A tambié
 4. **Pausa:** con Enter durante la partida.
 5. **Fin de partida:** muestra el resultado; Enter juega otra vez y B vuelve al menú.
 
+| Menú | Inicio | Pausa | Fin de partida |
+| :---: | :---: | :---: | :---: |
+| <img alt="Menú de Snake" src="./img/menu.png" width="150"/> | <img alt="Pantalla de inicio de Snake" src="./img/inicio.png" width="150"/> | <img alt="Pausa de Snake" src="./img/pausa.png" width="150"/> | <img alt="Fin de partida de Snake" src="./img/fin.png" width="150"/> |
+
 ## Diseño visual
 
-El juego usa los sprites de [`assets/snake`](../assets/snake), convertidos a `include/assets.h`:
+El juego usa los sprites de [`assets/snake`](../assets/snake), convertidos a `include/assets.h`.
+
+<div align="center">
+  <img width="428" height="288" alt="Paleta de assets de Snake" src="./img/assets_snake.png" />
+</div>
 
 | Asset | Uso |
 |---|---|
@@ -69,10 +81,14 @@ snake/
 ├── forDev.md
 ├── src/
 │   └── main.c
-└── include/
-    ├── assets.h
-    ├── basic_font.h
-    └── hal.h
+├── include/
+│   ├── assets.h
+│   ├── basic_font.h
+│   └── hal.h
+└── img/
+    ├── juego.png, menu.png, inicio.png, pausa.png, fin.png
+    ├── assets_snake.png
+    └── snake_demo.gif
 ```
 
 ## Tecnologías utilizadas
