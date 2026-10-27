@@ -27,6 +27,20 @@ Este repositorio contiene:
 
 ---
 
+## Menú principal
+
+El menú de la consola está en [`menu`](./menu): muestra la pantalla de espera y el selector de juegos, y desde ahí abre Road Fighter, Space Invaders, Snake, Pong o Tetris. Al compilarlo se compilan también todos los juegos:
+
+```bash
+cd menu
+mkdir build && cd build
+cmake ..
+cmake --build .
+./kubix
+```
+
+---
+
 ## Arquitectura general
 
 ![Diagrama del menú e inicio de juego](<./docs/diagramas/Diagrama logica juegos.png>)
