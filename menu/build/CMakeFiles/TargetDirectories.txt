@@ -4,5 +4,6 @@
 /mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles/snake_game.dir
 /mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles/pong_game.dir
 /mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles/Tetris_game.dir
+/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles/breakout_game.dir
 /mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles/edit_cache.dir
 /mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles/rebuild_cache.dir

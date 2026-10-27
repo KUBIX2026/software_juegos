@@ -24,7 +24,7 @@ target_compile_definitions(kubix PRIVATE KUBIX_ROOT="${KUBIX_ROOT}")
 option(KUBIX_BUILD_GAMES "Compilar los juegos junto con el menu" ON)
 if(KUBIX_BUILD_GAMES)
   string(REPLACE ";" "$<SEMICOLON>" prefix_path "${CMAKE_PREFIX_PATH}")
-  foreach(game roadFighter space_invaders snake pong Tetris)
+  foreach(game roadFighter space_invaders snake pong Tetris breakout)
     add_custom_target(${game}_game ALL
       COMMAND ${CMAKE_COMMAND} -S ${KUBIX_ROOT}/${game}
               -B ${KUBIX_ROOT}/${game}/build -G ${CMAKE_GENERATOR}

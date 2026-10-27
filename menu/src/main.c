@@ -43,6 +43,7 @@ static const GameEntry games[] = {
     {"SNAKE", "snake", "snake"},
     {"PONG", "pong", "pong"},
     {"TETRIS", "Tetris", "tetris"},
+    {"BREAKOUT", "breakout", "breakout"},
 };
 static const uint16_t *const pages[] = {GameSelector, GameSelector2};
 enum {
@@ -84,7 +85,8 @@ static void drawRing(int x0, int y0, int size, uint16_t color) {
 }
 
 // Mueve la seleccion por la cuadricula de 2x2; al salir por un costado pasa a
-// la pagina vecina. Si en esa posicion no hay juego, va al ultimo.
+// la pagina vecina. Si en esa posicion no hay juego, va a la ficha de arriba
+// de la misma columna, y si tampoco hay, se queda donde estaba.
 static int moveSelection(int selected, int dx, int dy) {
   int page = selected / TILES_PER_PAGE;
   int slot = selected % TILES_PER_PAGE;
@@ -103,9 +105,9 @@ static int moveSelection(int selected, int dx, int dy) {
     col = 1;
   }
   int target = page * TILES_PER_PAGE + row * 2 + col;
-  if (target < GAME_COUNT)
-    return target;
-  return dx > 0 ? GAME_COUNT - 1 : selected;
+  if (target >= GAME_COUNT)
+    target = page * TILES_PER_PAGE + col;
+  return target < GAME_COUNT ? target : selected;
 }
 
 // Busca el ejecutable en la carpeta build del juego (y en Release o Debug,

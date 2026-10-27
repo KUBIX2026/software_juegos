@@ -69,6 +69,7 @@ all: CMakeFiles/space_invaders_game.dir/all
 all: CMakeFiles/snake_game.dir/all
 all: CMakeFiles/pong_game.dir/all
 all: CMakeFiles/Tetris_game.dir/all
+all: CMakeFiles/breakout_game.dir/all
 .PHONY : all
 
 # The main recursive "codegen" target.
@@ -78,6 +79,7 @@ codegen: CMakeFiles/space_invaders_game.dir/codegen
 codegen: CMakeFiles/snake_game.dir/codegen
 codegen: CMakeFiles/pong_game.dir/codegen
 codegen: CMakeFiles/Tetris_game.dir/codegen
+codegen: CMakeFiles/breakout_game.dir/codegen
 .PHONY : codegen
 
 # The main recursive "preinstall" target.
@@ -91,6 +93,7 @@ clean: CMakeFiles/space_invaders_game.dir/clean
 clean: CMakeFiles/snake_game.dir/clean
 clean: CMakeFiles/pong_game.dir/clean
 clean: CMakeFiles/Tetris_game.dir/clean
+clean: CMakeFiles/breakout_game.dir/clean
 .PHONY : clean
 
 #=============================================================================
@@ -100,7 +103,7 @@ clean: CMakeFiles/Tetris_game.dir/clean
 CMakeFiles/kubix.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kubix.dir/build.make CMakeFiles/kubix.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kubix.dir/build.make CMakeFiles/kubix.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles" --progress-num=2,3 "Built target kubix"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles" --progress-num=3,4 "Built target kubix"
 .PHONY : CMakeFiles/kubix.dir/all
 
 # Build rule for subdir invocation for target.
@@ -117,7 +120,7 @@ kubix: CMakeFiles/kubix.dir/rule
 # codegen rule for target.
 CMakeFiles/kubix.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kubix.dir/build.make CMakeFiles/kubix.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles" --progress-num=2,3 "Finished codegen for target kubix"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles" --progress-num=3,4 "Finished codegen for target kubix"
 .PHONY : CMakeFiles/kubix.dir/codegen
 
 # clean rule for target.
@@ -132,7 +135,7 @@ CMakeFiles/kubix.dir/clean:
 CMakeFiles/roadFighter_game.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/roadFighter_game.dir/build.make CMakeFiles/roadFighter_game.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/roadFighter_game.dir/build.make CMakeFiles/roadFighter_game.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles" --progress-num=5 "Built target roadFighter_game"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles" --progress-num=6 "Built target roadFighter_game"
 .PHONY : CMakeFiles/roadFighter_game.dir/all
 
 # Build rule for subdir invocation for target.
@@ -149,7 +152,7 @@ roadFighter_game: CMakeFiles/roadFighter_game.dir/rule
 # codegen rule for target.
 CMakeFiles/roadFighter_game.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/roadFighter_game.dir/build.make CMakeFiles/roadFighter_game.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles" --progress-num=5 "Finished codegen for target roadFighter_game"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles" --progress-num=6 "Finished codegen for target roadFighter_game"
 .PHONY : CMakeFiles/roadFighter_game.dir/codegen
 
 # clean rule for target.
@@ -164,7 +167,7 @@ CMakeFiles/roadFighter_game.dir/clean:
 CMakeFiles/space_invaders_game.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/space_invaders_game.dir/build.make CMakeFiles/space_invaders_game.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/space_invaders_game.dir/build.make CMakeFiles/space_invaders_game.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles" --progress-num=7 "Built target space_invaders_game"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles" --progress-num=8 "Built target space_invaders_game"
 .PHONY : CMakeFiles/space_invaders_game.dir/all
 
 # Build rule for subdir invocation for target.
@@ -181,7 +184,7 @@ space_invaders_game: CMakeFiles/space_invaders_game.dir/rule
 # codegen rule for target.
 CMakeFiles/space_invaders_game.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/space_invaders_game.dir/build.make CMakeFiles/space_invaders_game.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles" --progress-num=7 "Finished codegen for target space_invaders_game"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles" --progress-num=8 "Finished codegen for target space_invaders_game"
 .PHONY : CMakeFiles/space_invaders_game.dir/codegen
 
 # clean rule for target.
@@ -196,7 +199,7 @@ CMakeFiles/space_invaders_game.dir/clean:
 CMakeFiles/snake_game.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/snake_game.dir/build.make CMakeFiles/snake_game.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/snake_game.dir/build.make CMakeFiles/snake_game.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles" --progress-num=6 "Built target snake_game"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles" --progress-num=7 "Built target snake_game"
 .PHONY : CMakeFiles/snake_game.dir/all
 
 # Build rule for subdir invocation for target.
@@ -213,7 +216,7 @@ snake_game: CMakeFiles/snake_game.dir/rule
 # codegen rule for target.
 CMakeFiles/snake_game.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/snake_game.dir/build.make CMakeFiles/snake_game.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles" --progress-num=6 "Finished codegen for target snake_game"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles" --progress-num=7 "Finished codegen for target snake_game"
 .PHONY : CMakeFiles/snake_game.dir/codegen
 
 # clean rule for target.
@@ -228,7 +231,7 @@ CMakeFiles/snake_game.dir/clean:
 CMakeFiles/pong_game.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/pong_game.dir/build.make CMakeFiles/pong_game.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/pong_game.dir/build.make CMakeFiles/pong_game.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles" --progress-num=4 "Built target pong_game"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles" --progress-num=5 "Built target pong_game"
 .PHONY : CMakeFiles/pong_game.dir/all
 
 # Build rule for subdir invocation for target.
@@ -245,7 +248,7 @@ pong_game: CMakeFiles/pong_game.dir/rule
 # codegen rule for target.
 CMakeFiles/pong_game.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/pong_game.dir/build.make CMakeFiles/pong_game.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles" --progress-num=4 "Finished codegen for target pong_game"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles" --progress-num=5 "Finished codegen for target pong_game"
 .PHONY : CMakeFiles/pong_game.dir/codegen
 
 # clean rule for target.
@@ -284,6 +287,38 @@ CMakeFiles/Tetris_game.dir/codegen:
 CMakeFiles/Tetris_game.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Tetris_game.dir/build.make CMakeFiles/Tetris_game.dir/clean
 .PHONY : CMakeFiles/Tetris_game.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/breakout_game.dir
+
+# All Build rule for target.
+CMakeFiles/breakout_game.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/breakout_game.dir/build.make CMakeFiles/breakout_game.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/breakout_game.dir/build.make CMakeFiles/breakout_game.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles" --progress-num=2 "Built target breakout_game"
+.PHONY : CMakeFiles/breakout_game.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/breakout_game.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start "/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles" 1
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/breakout_game.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start "/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles" 0
+.PHONY : CMakeFiles/breakout_game.dir/rule
+
+# Convenience name for target.
+breakout_game: CMakeFiles/breakout_game.dir/rule
+.PHONY : breakout_game
+
+# codegen rule for target.
+CMakeFiles/breakout_game.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/breakout_game.dir/build.make CMakeFiles/breakout_game.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir="/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build/CMakeFiles" --progress-num=2 "Finished codegen for target breakout_game"
+.PHONY : CMakeFiles/breakout_game.dir/codegen
+
+# clean rule for target.
+CMakeFiles/breakout_game.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/breakout_game.dir/build.make CMakeFiles/breakout_game.dir/clean
+.PHONY : CMakeFiles/breakout_game.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

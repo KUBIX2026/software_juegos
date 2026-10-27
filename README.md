@@ -22,14 +22,14 @@ Este repositorio contiene:
 | Snake | [`snake`](./snake) | Prototipo funcional |
 | Space Invaders | [`space_invaders`](./space_invaders) | Prototipo |
 | Pong | [`pong`](./pong) | En pruebas |
-| Breakout | [`breakout`](./breakout) | En desarrollo |
+| Breakout | [`breakout`](./breakout) | Prototipo |
 | Tetris | [`tetris`](./tetris) | Planeado |
 
 ---
 
 ## Menú principal
 
-El menú de la consola está en [`menu`](./menu): muestra la pantalla de espera y el selector de juegos, y desde ahí abre Road Fighter, Space Invaders, Snake, Pong o Tetris. Al compilarlo se compilan también todos los juegos:
+El menú de la consola está en [`menu`](./menu): muestra la pantalla de espera y el selector de juegos, y desde ahí abre Road Fighter, Space Invaders, Snake, Pong, Tetris o Breakout. Al compilarlo se compilan también todos los juegos:
 
 ```bash
 cd menu

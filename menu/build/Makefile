@@ -194,6 +194,19 @@ Tetris_game/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Tetris_game.dir/build.make CMakeFiles/Tetris_game.dir/build
 .PHONY : Tetris_game/fast
 
+#=============================================================================
+# Target rules for targets named breakout_game
+
+# Build rule for target.
+breakout_game: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 breakout_game
+.PHONY : breakout_game
+
+# fast build rule for target.
+breakout_game/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/breakout_game.dir/build.make CMakeFiles/breakout_game.dir/build
+.PHONY : breakout_game/fast
+
 src/main.o: src/main.c.o
 .PHONY : src/main.o
 
@@ -227,6 +240,7 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... Tetris_game"
+	@echo "... breakout_game"
 	@echo "... pong_game"
 	@echo "... roadFighter_game"
 	@echo "... snake_game"

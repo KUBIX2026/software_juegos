@@ -19,7 +19,7 @@ Menú de inicio de la consola. Muestra la pantalla de espera, deja elegir un jue
 | Página | Arriba a la izquierda | Arriba a la derecha | Abajo a la izquierda | Abajo a la derecha |
 |---|---|---|---|---|
 | 1 | Road Fighter | Space Invaders | Snake | Pong |
-| 2 | Tetris | (libre) | (libre) | (libre) |
+| 2 | Tetris | Breakout | (libre) | (libre) |
 
 ## Diseño visual
 
@@ -33,18 +33,18 @@ El menú usa los fondos de [`assets/Menus`](../assets/Menus), convertidos a `inc
 |---|---|
 | `waitingScreen` | Pantalla de espera. |
 | `GameSelector` | Página 1 del selector. En el PNG la ficha de Pong viene marcada; el menú repinta todos los bordes y marca la elegida. |
-| `GameSelector2` | Página 2 del selector: Tetris y tres fichas libres para juegos nuevos. |
+| `GameSelector2` | Página 2 del selector: Tetris, Breakout y dos fichas libres para juegos nuevos. |
 
 ## Controles
 
 | Acción | Control |
 |---|---|
 | Salir de la pantalla de espera | A o Enter |
-| Mover la selección | Flechas (al salir por un costado se pasa a la otra página) |
+| Mover la selección | Flechas (al salir por un costado se pasa a la otra página; si en esa posición no hay juego, se va a la ficha de arriba) |
 | Abrir el juego | A o Enter |
 | Volver a la pantalla de espera | B |
 
-Para volver al menú desde un juego, se sale del juego: en Snake, Space Invaders, Pong y Tetris con **B** en su menú, o cerrando su ventana (en Road Fighter, por ahora, solo cerrando la ventana).
+Para volver al menú desde un juego, se sale del juego: en Snake, Space Invaders, Pong, Tetris y Breakout con **B** en su menú, o cerrando su ventana (en Road Fighter, por ahora, solo cerrando la ventana).
 
 ## Cómo se abren los juegos
 
