@@ -38,6 +38,10 @@ cmake ..
 cmake --build .
 ./kubix
 ```
+---
+## Flujo de menus
+<img width="1014" height="586" alt="Diagrama de Flujo-Software_juegos" src="https://github.com/user-attachments/assets/378218cb-46fc-468e-992b-5d39ec3ffed0" />
+
 
 ---
 
