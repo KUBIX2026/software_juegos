@@ -2,16 +2,38 @@
 
 Menú de inicio de la consola. Muestra la pantalla de espera, deja elegir un juego en el selector y abre el juego elegido. Cuando el juego termina, el menú vuelve a aparecer.
 
+|  | |
+| :---: | :---: |
+| <img alt="Menú KUBIX" src="./img/menu.png" width="300"/> | <img alt="Demostración del menú KUBIX" src="./img/menu_demo.gif" width="300"/> |
+
 ## Pantallas
 
 1. **Pantalla de espera** (`waitingScreen`): el logo de KUBIX con *PRESS A*.
 2. **Selector de juegos** (`GameSelector` y `GameSelector2`): cuadrícula de 2 × 2 fichas en dos páginas. La ficha elegida se marca con borde azul y una línea blanca por dentro. Una flecha azul en el borde de la pantalla indica que hay otra página hacia ese lado.
 3. **Aviso *NOT BUILT***: aparece si el juego elegido todavía no está compilado.
 
+| Espera | Selector | Página 2 | Juego sin compilar |
+| :---: | :---: | :---: | :---: |
+| <img alt="Pantalla de espera" src="./img/espera.png" width="150"/> | <img alt="Selector de juegos" src="./img/selector.png" width="150"/> | <img alt="Página 2 del selector" src="./img/selector2.png" width="150"/> | <img alt="Aviso de juego sin compilar" src="./img/no_compilado.png" width="150"/> |
+
 | Página | Arriba a la izquierda | Arriba a la derecha | Abajo a la izquierda | Abajo a la derecha |
 |---|---|---|---|---|
 | 1 | Road Fighter | Space Invaders | Snake | Pong |
 | 2 | Tetris | (libre) | (libre) | (libre) |
+
+## Diseño visual
+
+El menú usa los fondos de [`assets/Menus`](../assets/Menus), convertidos a `include/assets.h`. El borde de la ficha elegida y las flechas de página se dibujan por código.
+
+<div align="center">
+  <img width="428" height="148" alt="Paleta de assets del menú" src="./img/assets_menu.png" />
+</div>
+
+| Asset | Uso |
+|---|---|
+| `waitingScreen` | Pantalla de espera. |
+| `GameSelector` | Página 1 del selector. En el PNG la ficha de Pong viene marcada; el menú repinta todos los bordes y marca la elegida. |
+| `GameSelector2` | Página 2 del selector: Tetris y tres fichas libres para juegos nuevos. |
 
 ## Controles
 
@@ -47,10 +69,14 @@ menu/
 ├── forDev.md
 ├── src/
 │   └── main.c
-└── include/
-    ├── assets.h
-    ├── basic_font.h
-    └── hal.h
+├── include/
+│   ├── assets.h
+│   ├── basic_font.h
+│   └── hal.h
+└── img/
+    ├── menu.png, espera.png, selector.png, selector2.png, no_compilado.png
+    ├── assets_menu.png
+    └── menu_demo.gif
 ```
 
 ## Ejecución
