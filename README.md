@@ -44,3 +44,15 @@ cmake --build .
 ## Arquitectura general
 
 ![Diagrama del menú e inicio de juego](<./docs/diagramas/Diagrama logica juegos.png>)
+
+El diagrama reúne dos flujos conectados:
+
+- **Diagrama 1, menú principal:** sirve para elegir uno de los 6 juegos. Los juegos se despliegan en la pantalla principal; con las flechas se mueve la selección, **A** abre el juego elegido y **B** no tiene efecto en este menú.
+- **Diagrama 2, inicio de juego:** cubre el submenú del juego (Singleplayer, Multiplayer, Tutorial, Scores y Exit), la partida y el guardado del score. La flecha de **A** del Diagrama 1 llega a su inicio, y los conectores **M** (B en el submenú y Exit) regresan al **MENU** del Diagrama 1.
+
+Detalles que fija el diagrama:
+
+- Los sprites se cargan una sola vez, antes del ciclo de juego.
+- En Multiplayer, quien envía el dato maneja el reloj.
+- Cada juego define qué muestra la pantalla auxiliar (matriz LED 32×8 con MAX7219).
+- El score se guarda en una EEPROM externa por I2C.
