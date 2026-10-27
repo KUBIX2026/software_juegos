@@ -4,6 +4,10 @@ Un juego de disparos de pantalla fija al estilo de los arcades clásicos: una fo
 
 En esta versión para KUBIX el jugador debe destruir cada oleada antes de que los aliens lleguen al suelo, protegiéndose detrás de las barreras y esquivando los disparos enemigos.
 
+|  | |
+| :---: | :---: |
+| <img alt="Space Invaders" src="./img/juego.png" width="300"/> | <img alt="Demostración de Space Invaders" src="./img/space_invaders_demo.gif" width="300"/> |
+
 ## Características del juego
 
 - Modo de 1 jugador y modo de 2 jugadores cooperativo, con las dos naves al mismo tiempo en pantalla.
@@ -51,9 +55,17 @@ Solo puede haber un disparo de cada nave en pantalla; mantener el botón vuelve 
 4. **Pausa:** con Enter durante la partida.
 5. **Fin de partida:** muestra el puntaje de cada jugador.
 
+| Menú | Inicio | Pausa | Fin de partida |
+| :---: | :---: | :---: | :---: |
+| <img alt="Menú de Space Invaders" src="./img/menu.png" width="150"/> | <img alt="Pantalla de inicio de Space Invaders" src="./img/inicio.png" width="150"/> | <img alt="Pausa de Space Invaders" src="./img/pausa.png" width="150"/> | <img alt="Fin de partida de Space Invaders" src="./img/fin.png" width="150"/> |
+
 ## Diseño visual
 
-El juego usa los sprites de [`assets/spaceInvaders`](../assets/spaceInvaders), convertidos a `include/assets.h`:
+El juego usa los sprites de [`assets/spaceInvaders`](../assets/spaceInvaders), convertidos a `include/assets.h`.
+
+<div align="center">
+  <img width="428" height="344" alt="Paleta de assets de Space Invaders" src="./img/assets_space_invaders.png" />
+</div>
 
 | Asset | Uso |
 |---|---|
@@ -80,10 +92,14 @@ space_invaders/
 ├── forDev.md
 ├── src/
 │   └── main.c
-└── include/
-    ├── assets.h
-    ├── basic_font.h
-    └── hal.h
+├── include/
+│   ├── assets.h
+│   ├── basic_font.h
+│   └── hal.h
+└── img/
+    ├── juego.png, menu.png, inicio.png, pausa.png, fin.png
+    ├── assets_space_invaders.png
+    └── space_invaders_demo.gif
 ```
 
 ## Tecnologías utilizadas
