@@ -18,12 +18,12 @@ Este repositorio contiene:
 
 | Juego | Carpeta | Estado |
 |---|---|---|
-| Road Fighter | [`roadFighter`](./roadFighter) | En desarrollo |
+| Road Fighter | [`roadFighter`](./roadFighter) | Prototipo funcional |
 | Snake | [`snake`](./snake) | Prototipo funcional |
-| Space Invaders | [`space_invaders`](./space_invaders) | Prototipo |
-| Pong | [`pong`](./pong) | En pruebas |
-| Breakout | [`breakout`](./breakout) | Prototipo |
-| Tetris | [`tetris`](./tetris) | Planeado |
+| Space Invaders | [`space_invaders`](./space_invaders) | Prototipo funcional |
+| Pong | [`pong`](./pong) | Prototipo funcional |
+| Breakout | [`breakout`](./breakout) | Prototipo funcional |
+| Tetris | [`tetris`](./tetris) | Prototipo funcional |
 
 ---
 
