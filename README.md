@@ -29,4 +29,4 @@ Este repositorio contiene:
 
 ## Arquitectura general
 
-![Diagrama del menú e inicio de juego](<./docs/diagramas/Diagrama menu e inicio de juego.png>)
+![Diagrama del menú e inicio de juego](<./docs/diagramas/Diagrama logica juegos.png>)
