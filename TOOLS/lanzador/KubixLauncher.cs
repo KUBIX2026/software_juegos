@@ -6,7 +6,7 @@
 //   KUBIX.exe --lanzar pong [seg]   abre un juego directo (clave: roadfighter, spaceinvaders,
 //                                   snake, pong, tetris, breakout, menu); con seg lo cierra
 //                                   a los seg segundos. Codigos: 0 bien, 2 sin compilar,
-//                                   3 el juego fallo, 4 clave desconocida.
+//                                   3 el juego fallo, 4 clave desconocida, 5 uso incorrecto.
 //   KUBIX.exe --captura salida.png  guarda una imagen de la ventana (para comprobar el diseno)
 using System;
 using System.Diagnostics;
@@ -105,7 +105,7 @@ namespace Kubix
     {
         public Game Game;
         public Image Picture;
-        public bool Selected, Hover, Running;
+        public bool Selected, Hover;
         public string Status = "";
         public Color StatusColor = Theme.Muted;
         static readonly Font NameFont = new Font("Segoe UI", 14f, FontStyle.Bold);
@@ -141,7 +141,7 @@ namespace Kubix
             g.SmoothingMode = SmoothingMode.AntiAlias;
             Rectangle r = new Rectangle(1, 1, Width - 3, Height - 3);
             using (GraphicsPath path = Round(r, 14))
-            using (SolidBrush fill = new SolidBrush(Hover && !Running ? Theme.PanelHover : Theme.Panel))
+            using (SolidBrush fill = new SolidBrush(Hover ? Theme.PanelHover : Theme.Panel))
             using (Pen border = new Pen(Selected ? Theme.Accent : Theme.Border, Selected ? 2.5f : 1.5f))
             {
                 g.FillPath(fill, path);
@@ -185,7 +185,7 @@ namespace Kubix
         Process running;
         Tile runningTile;
 
-        const int TileW = 320, TileH = 240, Gap = 12, Margin2 = 16, Top = 76;
+        const int TileW = 320, TileH = 240, Gap = 12, Margin2 = 16, HeaderH = 76;
 
         public MainForm(string root)
         {
@@ -197,7 +197,7 @@ namespace Kubix
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             StartPosition = FormStartPosition.CenterScreen;
-            ClientSize = new Size(3 * TileW + 2 * Gap + 2 * Margin2, Top + 2 * TileH + Gap + 10 + 96);
+            ClientSize = new Size(3 * TileW + 2 * Gap + 2 * Margin2, HeaderH + 2 * TileH + Gap + 10 + 96);
             KeyPreview = true;
             try { Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); } catch (Exception) { }
 
@@ -231,14 +231,14 @@ namespace Kubix
                 Game game = Locator.Games[i];
                 Tile t = new Tile(game, LoadPicture(game));
                 t.Size = new Size(TileW, TileH);
-                t.Location = new Point(Margin2 + (i % 3) * (TileW + Gap), Top + (i / 3) * (TileH + Gap));
+                t.Location = new Point(Margin2 + (i % 3) * (TileW + Gap), HeaderH + (i / 3) * (TileH + Gap));
                 int index = i;
                 t.Click += delegate { SelectTile(index); Launch(Locator.Games[index]); };
                 Controls.Add(t);
                 tiles[i] = t;
             }
 
-            int by = Top + 2 * TileH + Gap + 10;
+            int by = HeaderH + 2 * TileH + Gap + 10;
             Label help = new Label();
             help.Text = "Teclado = control NES:  Flechas = mover  ·  Enter = Start  ·  tecla A = botón A  ·  tecla B = botón B.\r\n" +
                         "Para salir de un juego usa su opción Exit o cierra su ventana: esta pantalla vuelve sola.";
@@ -433,8 +433,16 @@ namespace Kubix
                 return 1;
             }
 
-            if (args.Length >= 2 && args[0] == "--lanzar")
-                return LaunchDirect(root, args[1].ToLowerInvariant(), args.Length >= 3 ? int.Parse(args[2]) : 0);
+            // Uso incorrecto de las opciones: codigo 5, sin abrir ventanas ni lanzar excepciones.
+            if (args.Length >= 1 && args[0] == "--lanzar")
+            {
+                int seconds = 0;
+                if (args.Length < 2 || (args.Length >= 3 && (!int.TryParse(args[2], out seconds) || seconds < 0)))
+                    return 5;
+                return LaunchDirect(root, args[1].ToLowerInvariant(), seconds);
+            }
+            if (args.Length >= 1 && args[0] == "--captura" && args.Length < 2)
+                return 5;
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

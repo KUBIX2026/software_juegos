@@ -26,7 +26,7 @@ Cómo se comporta:
 - **Reescribe el archivo completo**, cabecera incluida, así que se puede ejecutar las veces que haga falta.
 - **Transparencia:** un píxel con alfa menor que 128, o del color `#0F081F` de la convención del repositorio, se escribe como `0x0843`, el color que `sendSprite()` omite.
 - **Los sprites salen en orden alfabético** y el nombre del arreglo es el del archivo, que debe ser un identificador válido de C.
-- **Si algo falla, no escribe nada:** una carpeta que no existe, un PNG ilegible, un nombre no válido, una carpeta sin PNG o un sprite de más de 255 píxeles por lado. Avisa con `ERROR:` y termina con código distinto de cero.
+- **Si algo falla, no escribe nada:** una carpeta que no existe, un PNG ilegible, un nombre no válido (o igual a una palabra reservada de C, como `int`), una carpeta sin PNG, una carpeta de salida que no existe o un sprite de más de 255 píxeles por lado. Avisa con `ERROR:` y termina con código distinto de cero.
 - **Conserva los saltos de línea** (CRLF o LF) del archivo de salida si ya existe, para que `git diff` solo muestre los sprites que cambiaron.
 
 ## Comandos de cada juego

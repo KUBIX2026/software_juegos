@@ -29,6 +29,9 @@ from PIL import Image
 TRANSPARENTE = 0x0843
 MAX_LADO = 255  # sendSprite() recibe ancho y alto como uint8_t
 IDENTIFICADOR = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+PALABRAS_C = frozenset("""auto break case char const continue default do double else enum extern float for goto
+    if inline int long register restrict return short signed sizeof static struct switch typedef union unsigned
+    void volatile while _Bool _Complex _Imaginary""".split())
 CABECERA = "// Generado por TOOLS/converter.py a partir de assets/*.png. No editar a mano.\n"
 
 
@@ -65,6 +68,9 @@ def generar(carpeta, macros, excluir=()):
             continue
         if not IDENTIFICADOR.match(nombre):
             errores.append(f"{archivo}: el nombre no es un identificador valido de C")
+            continue
+        if nombre in PALABRAS_C:
+            errores.append(f"{archivo}: '{nombre}' es una palabra reservada de C")
             continue
         try:
             ancho, alto, pixeles = convertir(os.path.join(carpeta, archivo))
@@ -117,7 +123,11 @@ def main():
             print(f"ERROR: {error}", file=sys.stderr)
         print(f"No se escribio '{args.output}'.", file=sys.stderr)
         return 1
-    escribir(args.output, texto)
+    try:
+        escribir(args.output, texto)
+    except OSError as error:
+        print(f"ERROR: no se pudo escribir '{args.output}': {error.strerror or error}", file=sys.stderr)
+        return 1
     omitidos = f", {len(args.exclude)} omitidos" if args.exclude else ""
     print(f"Escrito {args.output} ({cantidad} sprites{omitidos})")
     return 0
