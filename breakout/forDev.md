@@ -53,11 +53,10 @@ Abre **Visual Studio**, elige **Open a local folder** y selecciona la carpeta `b
 Los sprites de `include/assets.h` se generan a partir de los PNG de [`assets/breakout`](../assets/breakout) con la herramienta del repositorio. Desde la raíz del repositorio (requiere Python con Pillow):
 
 ```bash
-printf '#include <stdint.h>\n#pragma once\n\n' > breakout/include/assets.h
 python3 TOOLS/converter.py -i assets/breakout -o breakout/include/assets.h
 ```
 
-`converter.py` agrega al final del archivo, por eso primero se escribe la cabecera.
+`converter.py` reescribe `assets.h` completo, cabecera incluida, así que se puede ejecutar las veces que haga falta. Los PNG con transparencia (canal alfa o el color `#0F081F`) quedan con el color transparente `0x0843`.
 
 ## Ajustes del juego
 

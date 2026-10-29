@@ -1,4 +1,4 @@
-// Generado por tools/png2assets.py a partir de assets/*.png. No editar a mano.
+// Generado por TOOLS/converter.py a partir de assets/*.png. No editar a mano.
 #include <stdint.h>
 #pragma once
 

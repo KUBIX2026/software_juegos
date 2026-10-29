@@ -72,7 +72,7 @@ El juego usa los sprites de [`assets/roadFighters`](../assets/roadFighters), con
 | `BlueCar`, `YellowCar`, `Truck` | Vehículos del tráfico. |
 | `CarDestroyed` | Auto del jugador tras un choque. |
 
-`CarFront` y `Crash1`, `Crash2`, `Crash3` se incluyen en `assets.h` pero no se usan todavía. `Road` solo se usa en una pantalla de ajustes a la que aún no se llega desde el juego.
+`CarFront`, `Crash1`, `Crash2`, `Crash3`, `MainMenuV2` y `RoadFighterPlaying` se incluyen en `assets.h` pero no se usan todavía. `Road` solo se usa en una pantalla de ajustes a la que aún no se llega desde el juego.
 
 ## Estructura del proyecto
 

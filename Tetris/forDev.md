@@ -61,14 +61,14 @@ Con `-v` imprime también las pruebas que pasan. El programa termina con código
 
 ## Regenerar los sprites
 
-`include/assets.h` se genera a partir de todos los PNG de `assets/` (requiere Python y Pillow):
+`include/assets.h` se genera a partir de todos los PNG de `assets/` con la herramienta del repositorio. Desde la raíz del repositorio (requiere Python y Pillow):
 
 ```bash
 pip install pillow
-python tools/png2assets.py
+python3 TOOLS/converter.py -i Tetris/assets -o Tetris/include/assets.h --macros
 ```
 
-El píxel transparente se escribe como `0x0843`, el color que `sendSprite()` omite.
+El píxel transparente (canal alfa o el color `#0F081F`) se escribe como `0x0843`, el color que `sendSprite()` omite. `--macros` agrega las macros `Nombre_W` y `Nombre_H` con el tamaño de cada sprite.
 
 ## Visual Studio
 

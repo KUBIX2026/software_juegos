@@ -175,8 +175,6 @@ Tetris/
 ├── tests/
 │   ├── jugadores_bot.h
 │   └── tetris_tests.c
-├── tools/
-│   └── png2assets.py
 └── img/
     ├── juego.png, menu.png, inicio.png, pausa.png, fin.png
     ├── assets_tetris.png
@@ -190,11 +188,10 @@ Tetris/
 | `assets/` | Sprites PNG (bloques, cancha, menú, cursor, rótulos y dígitos) y 6 efectos de sonido. |
 | `src/main.c` | Pantallas, entrada de controles, dibujo y sonido. |
 | `src/tetris_logica.c` | Reglas: piezas, rotación, gravedad, líneas y puntaje. No depende de SDL. |
-| `include/assets.h` | Sprites en RGB565, generado a partir de `assets/`. |
+| `include/assets.h` | Sprites en RGB565, generado a partir de `assets/` con [`TOOLS/converter.py`](../TOOLS/converter.py). |
 | `include/hal.h`, `include/basic_font.h` | Capa de hardware y fuente de texto, las mismas de roadFighter y Pong. |
 | `include/tetris_logica.h` | Interfaz de la lógica del juego. |
 | `tests/` | Pruebas automáticas de la lógica y un jugador automático para probar la jugabilidad. |
-| `tools/png2assets.py` | Convierte los PNG de `assets/` en `include/assets.h`. |
 | `img/` | Capturas y animación que se muestran en este README. |
 
 ## Tecnologías utilizadas
@@ -247,7 +244,7 @@ Los recursos del juego están en:
 
 [`Tetris/assets/`](./assets)
 
-Siguen la convención de assets del repositorio: el color `#0F081F` (o la transparencia del PNG) se usa como color transparente. El archivo `include/assets.h` se genera a partir de los PNG con `tools/png2assets.py`.
+Siguen la convención de assets del repositorio: el color `#0F081F` (o la transparencia del PNG) se usa como color transparente. El archivo `include/assets.h` se genera a partir de los PNG con [`TOOLS/converter.py`](../TOOLS/converter.py) y la opción `--macros`.
 
 ## Límites conocidos
 

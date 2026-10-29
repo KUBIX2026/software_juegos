@@ -145,8 +145,6 @@ pong/
 ├── tests/
 │   ├── jugadores_bot.h
 │   └── pong_tests.c
-├── tools/
-│   └── png2assets.py
 └── img/
     ├── juego.png, menu.png, inicio.png, pausa.png, fin.png
     ├── assets_pong.png
@@ -160,11 +158,10 @@ pong/
 | `assets/` | Sprites PNG (cancha, paletas, pelota, dígitos, menú, cursor y rótulos) y efectos de sonido. |
 | `src/main.c` | Pantallas, entrada de controles, dibujo y sonido. |
 | `src/pong_logica.c` | Reglas: movimiento, colisiones, puntos, CPU y puntajes. No depende de SDL. |
-| `include/assets.h` | Sprites en RGB565, generado a partir de `assets/`. |
+| `include/assets.h` | Sprites en RGB565, generado a partir de `assets/` con [`TOOLS/converter.py`](../TOOLS/converter.py). |
 | `include/hal.h`, `include/basic_font.h` | Capa de hardware y fuente de texto, las mismas de roadFighter. |
 | `include/pong_logica.h` | Interfaz de la lógica del juego. |
 | `tests/` | Pruebas automáticas de la lógica y jugadores automáticos para probar la jugabilidad. |
-| `tools/png2assets.py` | Convierte los PNG de `assets/` en `include/assets.h`. |
 | `img/` | Capturas y animación que se muestran en este README. |
 
 ## Tecnologías utilizadas
@@ -212,7 +209,9 @@ Los recursos del juego se encuentran en:
 
 [`pong/assets/`](./assets)
 
-Estos recursos incluyen los sprites de la cancha, las paletas, la pelota, los dígitos del marcador, el fondo del menú, el cursor y los rótulos, además de los dos efectos de sonido. El archivo `include/assets.h` se genera a partir de los PNG con `tools/png2assets.py`.
+Estos recursos incluyen los sprites de la cancha, las paletas, la pelota, los dígitos del marcador, el fondo del menú, el cursor y los rótulos, además de los dos efectos de sonido. El archivo `include/assets.h` se genera a partir de los PNG con [`TOOLS/converter.py`](../TOOLS/converter.py) y la opción `--macros`.
+
+La carpeta [`assets/pong/`](../assets/pong) de la raíz contiene los diseños del equipo de arte (menús y pantallas de partida de referencia, con dígitos y paletas distintos a los del juego). El juego usa solo `pong/assets/`.
 
 ## Límites conocidos
 
