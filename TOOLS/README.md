@@ -44,3 +44,21 @@ python3 TOOLS/converter.py -i menu/assets -o menu/include/assets.h
 ```
 
 Los sprites que se omiten con `--exclude` siguen en `assets/`. Para usarlos en un juego, se quitan de su lista y se vuelve a generar `assets.h`.
+
+## compilar_windows.bat y KUBIX.exe
+
+Compilan en Windows, sin CMake, los 6 juegos, el menú de KUBIX y la app de escritorio `KUBIX.exe` (ventana con un clic por juego; el código está en `lanzador/KubixLauncher.cs`). Necesitan `gcc` (MinGW) y SDL2. Cada ejecutable queda en `<juego>/build`, junto con `SDL2.dll`; ni los ejecutables ni `build/` se suben al repositorio.
+
+```bash
+TOOLS\compilar_windows.bat
+.\TOOLS\compilar_windows.ps1 -Sdl2Dir C:\ruta\SDL2-2.32.10 -AccesoDirecto
+```
+
+| Opción | Uso |
+|---|---|
+| `-Sdl2Dir` | Carpeta de SDL2 (o la variable de entorno `SDL2_DIR`). Si no se indica, busca en `%USERPROFILE%\dev\SDL2-*`, `C:\SDL2*` y similares. |
+| `-AccesoDirecto` | Crea el icono KUBIX en el escritorio. |
+| `-SinLanzador` | No compila `KUBIX.exe` (solo los juegos y el menú). |
+| `-NoPausa` | No espera Enter al terminar. |
+
+`KUBIX.exe --lanzar <clave> [segundos]` abre un juego directo y `KUBIX.exe --captura salida.png` guarda una imagen de la ventana.

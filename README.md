@@ -40,6 +40,26 @@ cmake --build .
 ```
 ---
 
+## Cómo correr los juegos en Windows (app de escritorio)
+
+Para abrir cualquier juego con un clic, sin escribir comandos:
+
+1. **Compilar (una sola vez):** doble clic en [`TOOLS/compilar_windows.bat`](./TOOLS/compilar_windows.bat). Compila los 6 juegos, el menú de KUBIX y la app **`KUBIX.exe`**. Necesita `gcc` (MinGW) y SDL2, pero no CMake. Si no encuentra SDL2 solo, se le indica la carpeta: `.\TOOLS\compilar_windows.ps1 -Sdl2Dir C:\ruta\SDL2-2.32.10`.
+2. **Abrir:** doble clic en `KUBIX.exe` (en la carpeta del proyecto). Con `.\TOOLS\compilar_windows.ps1 -AccesoDirecto` también queda un icono **KUBIX** en el escritorio.
+3. **Jugar:** un clic en la ficha del juego. Las teclas 1 a 6 y Enter también sirven. Al cerrar el juego, la ventana de KUBIX vuelve sola.
+
+Otras formas de abrir un juego:
+
+| Quiero | Cómo |
+|---|---|
+| El menú de la consola (selector con flechas y tecla A) | Botón **Menú KUBIX (consola)** de la app, o `menu\build\kubix.exe` |
+| Un juego directo | `KUBIX.exe --lanzar pong` (claves: `roadfighter`, `spaceinvaders`, `snake`, `pong`, `tetris`, `breakout`, `menu`) |
+| Un juego sin la app | `<juego>\build\<juego>.exe` (el de Tetris es `Tetris\build\tetris.exe`) |
+
+Los controles del teclado equivalen al control NES: flechas, **Enter** = Start, tecla **A** y tecla **B**. El detalle de cada juego está en su README.
+
+---
+
 ## Mapa de pantallas
 
 ![Mapa de pantallas de KUBIX](<./docs/diagramas/Mapa de pantallas.png>)
