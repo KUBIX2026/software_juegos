@@ -17,7 +17,7 @@ En esta versión para KUBIX el jugador debe destruir cada oleada antes de que lo
 - Ovni que cruza la parte de arriba y da puntos extra.
 - Barreras que se rompen con los disparos y con los aliens que las alcanzan.
 - Puntaje y vidas en pantalla.
-- Pantallas de menú, inicio de partida, pausa y fin de partida.
+- Pantallas de menú, tutorial, puntajes, inicio de partida, pausa y fin de partida.
 - Sistema visual basado en sprites.
 
 ## Objetivo
@@ -49,7 +49,7 @@ Solo puede haber un disparo de cada nave en pantalla; mantener el botón vuelve 
 
 ## Pantallas
 
-1. **Menú:** 1 PLAYER, 2 PLAYER o MULTIPLAYER. MULTIPLAYER (partida entre consolas) todavía no está disponible y muestra un aviso.
+1. **Menú:** SINGLEPLAYER, MULTIPLAYER, TUTORIAL, SCORES y EXIT, como en el diagrama. MULTIPLAYER es de dos jugadores en la misma consola y necesita dos controles; si falta uno, muestra un aviso. TUTORIAL muestra los controles y SCORES los 5 mejores puntajes de las partidas de un jugador (se guardan en memoria mientras corre el juego).
 2. **Inicio de partida:** la formación y las naves en su lugar con el mensaje *PRESS START*.
 3. **Partida:** entre oleadas aparece el aviso *WAVE n*.
 4. **Pausa:** con Enter durante la partida.

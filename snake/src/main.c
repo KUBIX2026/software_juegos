@@ -1,6 +1,7 @@
 // Snake para KUBIX.
 // Flujo de pantallas segun docs/diagramas/Diagrama logica juegos.png:
-// menu -> "Press start" -> partida -> pausa / fin de partida.
+// menu (Singleplayer, Multiplayer, Tutorial, Scores, Exit) ->
+// "Press start" -> partida -> pausa / fin de partida.
 // El tablero es de 28x32 casillas de 2x2 px; los 8 px de la derecha son el
 // panel lateral con el puntaje de cada jugador. Los bordes se traspasan.
 
@@ -15,13 +16,17 @@ typedef enum {
   SCREEN_READY,
   SCREEN_GAME,
   SCREEN_PAUSE,
-  SCREEN_GAMEOVER
+  SCREEN_GAMEOVER,
+  SCREEN_TUTORIAL,
+  SCREEN_SCORES
 } AppScreen;
 
 typedef enum {
-  MENU_ONE_PLAYER,
-  MENU_TWO_PLAYERS,
+  MENU_SINGLEPLAYER,
   MENU_MULTIPLAYER,
+  MENU_TUTORIAL,
+  MENU_SCORES,
+  MENU_EXIT,
   MENU_COUNT
 } MenuItem;
 
@@ -52,6 +57,11 @@ enum {
   CURSOR_W = 3,
   CURSOR_H = 5,
   CURSOR_STEP = 9,
+  MENU_CLEAR_Y = 26, // desde esta fila se borran las opciones dibujadas en MainMenuV2
+  MENU_LIST_Y = 29,  // primera opcion de la lista
+  MENU_STEP = 7,
+  MENU_TEXT_X = 13,
+  TOP_N = 5,         // puntajes que guarda la tabla de mejores
   CHAR_W = 3, // fuente pequena 3x5: no dibuja bien la W, la M, la U ni el 7
   CHAR_H = 5,
   BIG_W = 5, // fuente 5x7
@@ -107,6 +117,25 @@ static uint16_t p1_panel[SIDEBAR_W * SIDEBAR_H];
 static uint16_t p2_panel[SIDEBAR_W * SIDEBAR_H];
 static uint16_t blank_panel[SIDEBAR_W * SIDEBAR_H];
 static uint16_t menu_cursor[CURSOR_W * CURSOR_H];
+
+static const char *const menu_labels[MENU_COUNT] = {
+    "SINGLEPLAYER", "MULTIPLAYER", "TUTORIAL", "SCORES", "EXIT"};
+
+// Los 5 mejores puntajes de una partida de un jugador (solo en memoria).
+static uint16_t top_scores[TOP_N];
+
+// Inserta el puntaje en la tabla (de mayor a menor); 1 si entro al top.
+static int registerScore(uint16_t top[TOP_N], uint16_t score) {
+  if (score <= top[TOP_N - 1])
+    return 0;
+  int i = TOP_N - 1;
+  while (i > 0 && top[i - 1] < score) {
+    top[i] = top[i - 1];
+    --i;
+  }
+  top[i] = score;
+  return 1;
+}
 
 static void preparePanel(uint16_t *panel, const uint16_t *source) {
   memcpy(panel, source, sizeof(uint16_t) * SIDEBAR_W * SIDEBAR_H);
@@ -399,11 +428,39 @@ static void drawGame(const Game *g, uint16_t best_score) {
 
 static void drawMenu(int selected) {
   sendBackground(MainMenuV2);
-  // El fondo trae la flecha dibujada en la primera opcion: se tapa y se
-  // dibuja en la opcion elegida.
-  sendSprite(black_pixels, CURSOR_X, CURSOR_Y, CURSOR_W, CURSOR_H);
-  sendSprite(menu_cursor, CURSOR_X, (uint8_t)(CURSOR_Y + selected * CURSOR_STEP),
-             CURSOR_W, CURSOR_H);
+  // El fondo trae dibujadas sus tres opciones: se borran y se escribe la lista
+  // del diagrama (la misma de Pong y Tetris), con la flecha en la elegida.
+  sendSprite(black_pixels, 0, MENU_CLEAR_Y, SCREEN_SIZE,
+             SCREEN_SIZE - MENU_CLEAR_Y);
+  for (int i = 0; i < MENU_COUNT; ++i) {
+    uint8_t y = (uint8_t)(MENU_LIST_Y + i * MENU_STEP);
+    if (i == selected)
+      sendSprite(menu_cursor, CURSOR_X, y, CURSOR_W, CURSOR_H);
+    drawText(menu_labels[i], MENU_TEXT_X, y);
+  }
+}
+
+static void drawTutorial(void) {
+  drawBig("CONTROLS", 1, SCREEN_SIZE);
+  drawBig("ARROWS:", 10, SCREEN_SIZE);
+  drawBig("TURN", 19, SCREEN_SIZE);
+  drawBig("START:", 28, SCREEN_SIZE);
+  drawBig("PAUSE", 37, SCREEN_SIZE);
+  drawBig("P2: WASD", 46, SCREEN_SIZE);
+  drawBig("B: BACK", 55, SCREEN_SIZE);
+}
+
+static void drawScores(void) {
+  char line[16];
+  drawCentered("TOP 5", 3, SCREEN_SIZE);
+  for (int i = 0; i < TOP_N; ++i) {
+    if (top_scores[i] > 0)
+      snprintf(line, sizeof(line), "%d. %04u", i + 1, (unsigned)top_scores[i]);
+    else
+      snprintf(line, sizeof(line), "%d. ----", i + 1);
+    drawBig(line, (uint8_t)(12 + i * 9), SCREEN_SIZE);
+  }
+  drawCentered("B: BACK", 58, SCREEN_SIZE);
 }
 
 static void drawMessage(const char *const lines[2]) {
@@ -441,13 +498,12 @@ int main(int argc, char *argv[]) {
   prepareSprites();
 
   static Game game;
-  static const char *const multiplayer_message[2] = {"COMING", "SOON"};
   static const char *const controls_message[2] = {"NEED 2", "CONTROLS"};
-  const char *const *message = multiplayer_message;
+  const char *const *message = controls_message;
 
   int running = 1;
   AppScreen current_screen = SCREEN_STARTMENU;
-  int menu_selected = MENU_ONE_PLAYER;
+  int menu_selected = MENU_SINGLEPLAYER;
   uint16_t best_score = 0;
   int made_best = 0;
   int gameover_wait = 0;
@@ -478,22 +534,36 @@ int main(int argc, char *argv[]) {
       if (back) {
         backToGeneralMenu(&running);
       } else if (confirm) {
-        if (menu_selected == MENU_MULTIPLAYER) {
-          message = multiplayer_message;
-          current_screen = SCREEN_MESSAGE;
-        } else if (menu_selected == MENU_TWO_PLAYERS &&
-                   connectedControls() < 2) {
-          message = controls_message;
-          current_screen = SCREEN_MESSAGE;
-        } else {
-          initGame(&game, menu_selected == MENU_TWO_PLAYERS ? 2 : 1,
-                   frame_ticks);
+        switch (menu_selected) {
+        case MENU_SINGLEPLAYER:
+          initGame(&game, 1, frame_ticks);
           current_screen = SCREEN_READY;
+          break;
+        case MENU_MULTIPLAYER:
+          if (connectedControls() < 2) {
+            message = controls_message;
+            current_screen = SCREEN_MESSAGE;
+          } else {
+            initGame(&game, 2, frame_ticks);
+            current_screen = SCREEN_READY;
+          }
+          break;
+        case MENU_TUTORIAL:
+          current_screen = SCREEN_TUTORIAL;
+          break;
+        case MENU_SCORES:
+          current_screen = SCREEN_SCORES;
+          break;
+        default:
+          backToGeneralMenu(&running);
+          break;
         }
       }
       break;
 
     case SCREEN_MESSAGE:
+    case SCREEN_TUTORIAL:
+    case SCREEN_SCORES:
       if (back || confirm)
         current_screen = SCREEN_STARTMENU;
       break;
@@ -517,6 +587,8 @@ int main(int argc, char *argv[]) {
         made_best = game.players == 1 && game.snakes[0].score > best_score;
         if (made_best)
           best_score = game.snakes[0].score;
+        if (game.players == 1)
+          registerScore(top_scores, game.snakes[0].score);
         gameover_wait = GAMEOVER_WAIT;
         current_screen = SCREEN_GAMEOVER;
       }
@@ -552,6 +624,12 @@ int main(int argc, char *argv[]) {
       break;
     case SCREEN_MESSAGE:
       drawMessage(message);
+      break;
+    case SCREEN_TUTORIAL:
+      drawTutorial();
+      break;
+    case SCREEN_SCORES:
+      drawScores();
       break;
     case SCREEN_READY:
       drawGame(&game, best_score);

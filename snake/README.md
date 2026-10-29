@@ -16,7 +16,7 @@ En esta versión para KUBIX el jugador guía la serpiente con el control, debe e
 - Manzanas en posiciones aleatorias, siempre en una casilla libre.
 - Panel lateral con el puntaje de cada jugador.
 - Récord de la sesión en el modo de 1 jugador.
-- Pantallas de menú, inicio de partida, pausa y fin de partida.
+- Pantallas de menú, tutorial, puntajes, inicio de partida, pausa y fin de partida.
 - Sistema visual basado en sprites.
 
 ## Objetivo
@@ -41,7 +41,7 @@ En la pausa, **A** (o Enter) reanuda y **B** vuelve al menú. La tecla A tambié
 
 ## Pantallas
 
-1. **Menú:** 1 PLAYER, 2 PLAYER o MULTIPLAYER. MULTIPLAYER (partida entre consolas) todavía no está disponible y muestra un aviso.
+1. **Menú:** SINGLEPLAYER, MULTIPLAYER, TUTORIAL, SCORES y EXIT, como en el diagrama. MULTIPLAYER es de dos jugadores en la misma consola y necesita dos controles; si falta uno, muestra un aviso. TUTORIAL muestra los controles y SCORES los 5 mejores puntajes de las partidas de un jugador (se guardan en memoria mientras corre el juego).
 2. **Inicio de partida:** el tablero con las serpientes en su lugar y el mensaje *PRESS START*.
 3. **Partida.**
 4. **Pausa:** con Enter durante la partida.
