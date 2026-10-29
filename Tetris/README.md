@@ -129,7 +129,7 @@ Estado de cada parte:
 - [x] Estructura de carpetas, CMake y guía de compilación.
 - [x] Sprites: bloques, cancha, menú, cursor, rótulos y dígitos.
 - [x] Lógica: tablero, piezas, rotación, bolsas de 7, gravedad, líneas y puntaje.
-- [x] Pruebas automáticas de la lógica (144 pruebas, 100 % de las líneas).
+- [x] Pruebas automáticas de la lógica (145 pruebas, 100 % de las líneas).
 - [x] Pantallas: menú, tutorial, partida, pausa, fin de partida y puntajes.
 - [x] Efectos de sonido, conectados al juego.
 - [x] Capturas y animación en este README.
@@ -223,7 +223,7 @@ gcc -Wall -Wextra -Wconversion -Iinclude -o tetris_tests tests/tetris_tests.c sr
 ./tetris_tests
 ```
 
-Son 144 pruebas y cubren el 100 % de las líneas de la lógica:
+Son 145 pruebas y cubren el 100 % de las líneas de la lógica:
 
 - Las formas de las 7 piezas y que cada rotación sea un giro de 90 grados.
 - Los choques con paredes, piso y bloques.

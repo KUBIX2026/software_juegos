@@ -194,7 +194,7 @@ gcc -Wall -Wextra -Wconversion -Iinclude -o pong_tests tests/pong_tests.c src/po
 ./pong_tests
 ```
 
-Son 180 pruebas y cubren el 100 % de las líneas de la lógica. Incluyen:
+Son 183 pruebas y cubren el 100 % de las líneas de la lógica. Incluyen:
 
 - Colisiones con las paletas y las paredes en los bordes exactos, un subpíxel antes y un subpíxel después.
 - Los 5 ángulos de rebote en las dos paletas, y que las dos paletas se comporten como espejo.

@@ -334,6 +334,22 @@ static void pruebas_zonas_y_angulos(void) {
       niveles_ok = 0;
   }
   CHECK(niveles_ok, "angulos: el borde da 20, 24, 30 y 36 segun el nivel de velocidad");
+
+  /* las cinco zonas en cada nivel de velocidad (antes solo se miraba el borde) */
+  const int vy_zona[4][5] = {{-20, -10, 0, 10, 20}, {-24, -12, 0, 12, 24}, {-30, -15, 0, 15, 30}, {-36, -18, 0, 18, 36}};
+  const int vx_nivel[4] = {16, 20, 26, 32};
+  const int by_zona[5] = {29, 31, 34, 37, 39};
+  int zonas_nivel_ok = 1, vx_ok = 1;
+  for (int nivel = 0; nivel < 4; nivel++)
+    for (int z = 0; z < 5; z++) {
+      EstadoPong e = golpe_izq(by_zona[z], nivel == 0 ? 0 : nivel * PONG_GOLPES_POR_NIVEL - 1);
+      if (z == 2 ? e.pelota_vy != 0 : !cerca(e.pelota_vy, vy_zona[nivel][z]))
+        zonas_nivel_ok = 0;
+      if (e.pelota_vx != vx_nivel[nivel])
+        vx_ok = 0;
+    }
+  CHECK(zonas_nivel_ok, "angulos: las cinco zonas dan su angulo en cada nivel de velocidad (el centro siempre recto)");
+  CHECK(vx_ok, "velocidad horizontal tras el golpe: 16, 20, 26 y 32 segun el nivel");
 }
 
 /* La pelota justo en un borde: ni un cuadro antes ni uno despues. */
@@ -556,6 +572,7 @@ static void pruebas_puntos_y_fin(void) {
   CHECK(g.juego_terminado && g.ganador == 1 && g.puntos_izq == 7,
         "7 puntos: gana la izquierda");
   CHECK(g.eventos & PONG_EVT_FIN, "el ultimo punto avisa evento de fin");
+  CHECK(g.pelota_vx == 0 && g.pelota_vy == 0, "fin de partida: la pelota se detiene");
   EstadoPong copia = g;
   for (int i = 0; i < 1000; i++)
     pong_actualizar(&g, PONG_ACCION_ARRIBA, PONG_ACCION_ABAJO);

@@ -335,6 +335,7 @@ static void pruebas_rotacion(void) {
   der.rotar_der = 1;
   con(&e, der);
   CHECK(e.rot == 1 && (e.eventos & TETRIS_EVT_ROTAR), "rotar avisa evento y cambia la rotacion");
+  CHECK(e.px == 3 && e.py == 6, "rotar en campo abierto no desplaza la pieza (el primer desplazamiento SRS es 0,0)");
   EstadoTetris o = con_pieza(TETRIS_O);
   o.py = 6;
   con(&o, der);
@@ -705,6 +706,7 @@ static void pruebas_celda_visible(void) {
   e.tablero[TETRIS_FILAS_OCULTAS][0] = 3; /* primera fila visible */
   e.tablero[TETRIS_FILAS_TOTAL - 1][9] = 5; /* ultima fila visible */
   e.tablero[0][4] = 7;                     /* fila oculta */
+  e.tablero[TETRIS_FILAS_OCULTAS + 1][0] = 9; /* lo que alcanzaria una lectura que se pase de la fila */
   CHECK(tetris_celda(&e, 0, 0) == 3 && tetris_celda(&e, 9, 19) == 5,
         "celda visible: la fila 0 es la primera despues de las ocultas");
   CHECK(tetris_celda(&e, 4, -1) == 0 && tetris_celda(&e, 4, -2) == 0,
