@@ -11,12 +11,14 @@ Requiere Python y Pillow (`pip install pillow`). Se ejecuta desde la raíz del r
 ```bash
 python3 TOOLS/converter.py -i assets/snake -o snake/include/assets.h
 python3 TOOLS/converter.py -i assets/Tetris -o Tetris/include/assets.h --macros
+python3 TOOLS/converter.py -i assets/pong -o pong/include/assets.h --macros --exclude MainMenuV1 MainMenuV2 PauseMenu PongPlaying
 ```
 
 | Opción | Uso |
 |---|---|
 | `-i`, `--input` | Carpeta con los PNG (obligatoria). |
 | `-o`, `--output` | Archivo `.h` de salida (por defecto `./include/assets.h`). |
+| `--exclude` | Nombres de PNG (sin `.png`) que no se convierten, por ejemplo diseños que el juego no usa y no deben ocupar memoria. Un nombre que no existe es un error. |
 | `--macros` | Agrega `Nombre_W` y `Nombre_H` con el tamaño de cada sprite (formato de Tetris y Pong). |
 
 Cómo se comporta:

@@ -65,10 +65,10 @@ Con `-v` imprime también las pruebas que pasan. El programa termina con código
 
 ```bash
 pip install pillow
-python3 TOOLS/converter.py -i assets/pong -o pong/include/assets.h --macros
+python3 TOOLS/converter.py -i assets/pong -o pong/include/assets.h --macros --exclude MainMenuV1 MainMenuV2 PauseMenu PongPlaying
 ```
 
-El píxel transparente (canal alfa o el color `#0F081F`) se escribe como `0x0843`, el color que `sendSprite()` omite. `--macros` agrega las macros `Nombre_W` y `Nombre_H` con el tamaño de cada sprite.
+El píxel transparente (canal alfa o el color `#0F081F`) se escribe como `0x0843`, el color que `sendSprite()` omite. `--macros` agrega las macros `Nombre_W` y `Nombre_H` con el tamaño de cada sprite. `--exclude` omite los 4 menús de diseño del equipo de arte, que el juego no usa y no deben ocupar memoria.
 
 ## Visual Studio
 

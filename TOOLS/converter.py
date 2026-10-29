@@ -14,6 +14,8 @@ Transparencia: un pixel con alfa < 128, o del color #0F081F de la convencion del
 repositorio, se escribe como 0x0843, el color que sendSprite() omite.
 
 Con --macros se emiten ademas `Nombre_W` y `Nombre_H` (formato de Tetris y Pong).
+Con --exclude Nombre1 Nombre2 se omiten esos PNG (por ejemplo disenos que el juego
+no usa y que no deben ocupar memoria); un nombre que no existe es un error.
 Si algun PNG falla, o la carpeta no existe, no se escribe nada y el programa
 termina con codigo distinto de cero.
 """
@@ -47,15 +49,20 @@ def convertir(ruta):
     return ancho, alto, pixeles
 
 
-def generar(carpeta, macros):
+def generar(carpeta, macros, excluir=()):
     """Devuelve (texto, errores, cantidad de sprites)."""
     partes = [CABECERA, "#include <stdint.h>\n#pragma once\n\n"]
     errores = []
     cantidad = 0
+    nombres = {os.path.splitext(a)[0] for a in os.listdir(carpeta) if a.lower().endswith(".png")}
+    for sobrante in sorted(set(excluir) - nombres):
+        errores.append(f"--exclude: no hay ningun PNG llamado '{sobrante}' en '{carpeta}'")
     for archivo in sorted(os.listdir(carpeta)):
         if not archivo.lower().endswith(".png"):
             continue
         nombre = os.path.splitext(archivo)[0]
+        if nombre in excluir:
+            continue
         if not IDENTIFICADOR.match(nombre):
             errores.append(f"{archivo}: el nombre no es un identificador valido de C")
             continue
@@ -95,12 +102,14 @@ def main():
     parser.add_argument("-o", "--output", default="./include/assets.h",
                         help="Archivo .h de salida (por defecto: ./include/assets.h).")
     parser.add_argument("--macros", action="store_true", help="Agregar las macros Nombre_W y Nombre_H.")
+    parser.add_argument("--exclude", nargs="+", default=[], metavar="NOMBRE",
+                        help="Nombres de PNG (sin .png) que no se convierten, por ejemplo disenos que el juego no usa.")
     args = parser.parse_args()
 
     if not os.path.isdir(args.input):
         print(f"ERROR: la carpeta '{args.input}' no existe.", file=sys.stderr)
         return 2
-    texto, errores, cantidad = generar(args.input, args.macros)
+    texto, errores, cantidad = generar(args.input, args.macros, set(args.exclude))
     if cantidad == 0 and not errores:
         errores.append(f"'{args.input}' no tiene archivos PNG")
     if errores:
@@ -109,7 +118,8 @@ def main():
         print(f"No se escribio '{args.output}'.", file=sys.stderr)
         return 1
     escribir(args.output, texto)
-    print(f"Escrito {args.output} ({cantidad} sprites)")
+    omitidos = f", {len(args.exclude)} omitidos" if args.exclude else ""
+    print(f"Escrito {args.output} ({cantidad} sprites{omitidos})")
     return 0
 
 

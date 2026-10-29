@@ -196,9 +196,9 @@ Los recursos del juego se encuentran en:
 
 [`assets/pong/`](../assets/pong)
 
-Estos recursos incluyen los sprites de la cancha, las paletas, la pelota, los dígitos del marcador, el fondo del menú, el cursor y los rótulos, además de los dos efectos de sonido. El archivo `include/assets.h` se genera a partir de los PNG con [`TOOLS/converter.py`](../TOOLS/converter.py) y la opción `--macros`.
+Estos recursos incluyen los sprites de la cancha, las paletas, la pelota, los dígitos del marcador, el fondo del menú, el cursor y los rótulos, además de los dos efectos de sonido. El archivo `include/assets.h` se genera a partir de los PNG con [`TOOLS/converter.py`](../TOOLS/converter.py) y las opciones `--macros` y `--exclude`.
 
-La misma carpeta guarda los diseños del equipo de arte (`MainMenuV1`, `MainMenuV2`, `PauseMenu` y `PongPlaying`); el juego aún no los usa. `Player2` mide 2×10, igual que la paleta de la lógica del juego.
+La misma carpeta guarda los diseños del equipo de arte (`MainMenuV1`, `MainMenuV2`, `PauseMenu` y `PongPlaying`); el juego aún no los usa, así que se omiten al generar `assets.h` (`--exclude`) y no ocupan memoria. `Player2` mide 2×10, igual que la paleta de la lógica del juego.
 
 ## Límites conocidos
 
