@@ -4,7 +4,7 @@
 Uso, desde la raiz del repositorio (requiere Pillow: pip install pillow):
 
     python3 TOOLS/converter.py -i assets/snake -o snake/include/assets.h
-    python3 TOOLS/converter.py -i Tetris/assets -o Tetris/include/assets.h --macros
+    python3 TOOLS/converter.py -i assets/Tetris -o Tetris/include/assets.h --macros
 
 Cada PNG genera `const uint16_t Nombre[ancho*alto]`, en orden alfabetico. El
 archivo de salida se reescribe completo (cabecera incluida), asi que se puede

@@ -154,16 +154,6 @@ Tetris/
 ├── CMakeLists.txt
 ├── README.md
 ├── forDev.md
-├── assets/
-│   ├── BloqueI.png, BloqueO.png, BloqueT.png, BloqueS.png
-│   ├── BloqueZ.png, BloqueJ.png, BloqueL.png, BloqueSombra.png
-│   ├── Cancha.png
-│   ├── MenuTetris.png
-│   ├── Cursor.png
-│   ├── LabelPaused.png, LabelGameOver.png
-│   ├── Dig0.png ... Dig9.png
-│   └── tetris_rotar.wav, tetris_fijar.wav, tetris_linea.wav,
-│       tetris_cuatro.wav, tetris_nivel.wav, tetris_fin.wav
 ├── src/
 │   ├── main.c
 │   └── tetris_logica.c
@@ -185,10 +175,10 @@ Tetris/
 |---|---|
 | `CMakeLists.txt` | Compilación del juego y de las pruebas con CMake y SDL2. |
 | `forDev.md` | Guía de compilación y ejecución. |
-| `assets/` | Sprites PNG (bloques, cancha, menú, cursor, rótulos y dígitos) y 6 efectos de sonido. |
+| [`../assets/Tetris/`](../assets/Tetris) | Sprites PNG (bloques, cancha, menú, cursor, rótulos y dígitos) y 6 efectos de sonido. Está en la carpeta de assets de la raíz, como los demás juegos. |
 | `src/main.c` | Pantallas, entrada de controles, dibujo y sonido. |
 | `src/tetris_logica.c` | Reglas: piezas, rotación, gravedad, líneas y puntaje. No depende de SDL. |
-| `include/assets.h` | Sprites en RGB565, generado a partir de `assets/` con [`TOOLS/converter.py`](../TOOLS/converter.py). |
+| `include/assets.h` | Sprites en RGB565, generado a partir de [`assets/Tetris`](../assets/Tetris) con [`TOOLS/converter.py`](../TOOLS/converter.py). |
 | `include/hal.h`, `include/basic_font.h` | Capa de hardware y fuente de texto, las mismas de roadFighter y Pong. |
 | `include/tetris_logica.h` | Interfaz de la lógica del juego. |
 | `tests/` | Pruebas automáticas de la lógica y un jugador automático para probar la jugabilidad. |
@@ -212,7 +202,7 @@ Para obtener información sobre la compilación y ejecución, consulte:
 
 [`Tetris/forDev.md`](./forDev.md)
 
-Los sonidos se cargan desde `../assets`, por lo que el juego debe ejecutarse desde la carpeta `build`.
+Los sonidos se cargan desde `../../assets/Tetris`, por lo que el juego debe ejecutarse desde la carpeta `build`.
 
 ## Pruebas
 
@@ -242,7 +232,7 @@ Son 144 pruebas y cubren el 100 % de las líneas de la lógica:
 
 Los recursos del juego están en:
 
-[`Tetris/assets/`](./assets)
+[`assets/Tetris/`](../assets/Tetris)
 
 Siguen la convención de assets del repositorio: el color `#0F081F` (o la transparencia del PNG) se usa como color transparente. El archivo `include/assets.h` se genera a partir de los PNG con [`TOOLS/converter.py`](../TOOLS/converter.py) y la opción `--macros`.
 

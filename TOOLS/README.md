@@ -10,7 +10,7 @@ Requiere Python y Pillow (`pip install pillow`). Se ejecuta desde la raíz del r
 
 ```bash
 python3 TOOLS/converter.py -i assets/snake -o snake/include/assets.h
-python3 TOOLS/converter.py -i Tetris/assets -o Tetris/include/assets.h --macros
+python3 TOOLS/converter.py -i assets/Tetris -o Tetris/include/assets.h --macros
 ```
 
 | Opción | Uso |

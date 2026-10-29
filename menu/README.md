@@ -48,7 +48,7 @@ Para volver al menú desde un juego, se sale del juego: en Snake, Space Invaders
 
 ## Cómo se abren los juegos
 
-En el simulador cada juego es un programa aparte. El menú busca el ejecutable en la carpeta `build` de cada juego (también en `build/Release` y `build/Debug`, donde lo deja Visual Studio), oculta su ventana, lo ejecuta desde esa carpeta y espera a que termine. Ejecutarlo desde su carpeta `build` es necesario porque Pong y Tetris cargan sus sonidos desde `../assets`.
+En el simulador cada juego es un programa aparte. El menú busca el ejecutable en la carpeta `build` de cada juego (también en `build/Release` y `build/Debug`, donde lo deja Visual Studio), oculta su ventana, lo ejecuta desde esa carpeta y espera a que termine. Ejecutarlo desde su carpeta `build` es necesario porque Pong y Tetris cargan sus sonidos desde `../../assets/<juego>`.
 
 Cada juego ya tiene un punto de enganche para esto: su función `backToGeneralMenu()` termina el programa, y con eso se vuelve al menú.
 

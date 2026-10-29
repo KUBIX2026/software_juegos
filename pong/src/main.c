@@ -231,9 +231,9 @@ static void drawGameOver(const EstadoPong *e, int made_top) {
 int main(int argc, char *argv[]) {
   if (initScreen(argc, argv) != 0)
     return 1;
-  sound_tap = initSound("../assets/mixkit-game-ball-tap-2073.wav");
+  sound_tap = initSound("../../assets/pong/mixkit-game-ball-tap-2073.wav");
   sound_click =
-      initSound("../assets/mixkit-video-game-retro-click-237.wav");
+      initSound("../../assets/pong/mixkit-video-game-retro-click-237.wav");
 
   int running = 1;
   AppScreen screen = SCREEN_MENU;

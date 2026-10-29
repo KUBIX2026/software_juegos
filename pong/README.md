@@ -121,19 +121,6 @@ pong/
 ├── CMakeLists.txt
 ├── README.md
 ├── forDev.md
-├── assets/
-│   ├── Ball.png
-│   ├── Escenario.png
-│   ├── Player1.png
-│   ├── Player2.png
-│   ├── Num0.png ... Num9.png
-│   ├── MenuPong.png
-│   ├── Cursor.png
-│   ├── LabelPaused.png
-│   ├── LabelYouWin.png, LabelYouLose.png
-│   ├── LabelP1Wins.png, LabelP2Wins.png
-│   ├── mixkit-game-ball-tap-2073.wav
-│   └── mixkit-video-game-retro-click-237.wav
 ├── src/
 │   ├── main.c
 │   └── pong_logica.c
@@ -155,10 +142,10 @@ pong/
 |---|---|
 | `CMakeLists.txt` | Compilación del juego y de las pruebas con CMake y SDL2. |
 | `forDev.md` | Guía de compilación y ejecución. |
-| `assets/` | Sprites PNG (cancha, paletas, pelota, dígitos, menú, cursor y rótulos) y efectos de sonido. |
+| [`../assets/pong/`](../assets/pong) | Sprites PNG (cancha, paletas, pelota, dígitos, menú, cursor y rótulos), los menús de diseño y los efectos de sonido. Está en la carpeta de assets de la raíz, como los demás juegos. |
 | `src/main.c` | Pantallas, entrada de controles, dibujo y sonido. |
 | `src/pong_logica.c` | Reglas: movimiento, colisiones, puntos, CPU y puntajes. No depende de SDL. |
-| `include/assets.h` | Sprites en RGB565, generado a partir de `assets/` con [`TOOLS/converter.py`](../TOOLS/converter.py). |
+| `include/assets.h` | Sprites en RGB565, generado a partir de [`assets/pong`](../assets/pong) con [`TOOLS/converter.py`](../TOOLS/converter.py). |
 | `include/hal.h`, `include/basic_font.h` | Capa de hardware y fuente de texto, las mismas de roadFighter. |
 | `include/pong_logica.h` | Interfaz de la lógica del juego. |
 | `tests/` | Pruebas automáticas de la lógica y jugadores automáticos para probar la jugabilidad. |
@@ -182,7 +169,7 @@ Para obtener información sobre la compilación y ejecución, consulte:
 
 [`pong/forDev.md`](./forDev.md)
 
-Los sonidos se cargan desde `../assets`, por lo que el juego debe ejecutarse desde la carpeta `build`.
+Los sonidos se cargan desde `../../assets/pong`, por lo que el juego debe ejecutarse desde la carpeta `build`.
 
 ## Pruebas
 
@@ -207,11 +194,11 @@ Son 180 pruebas y cubren el 100 % de las líneas de la lógica. Incluyen:
 
 Los recursos del juego se encuentran en:
 
-[`pong/assets/`](./assets)
+[`assets/pong/`](../assets/pong)
 
 Estos recursos incluyen los sprites de la cancha, las paletas, la pelota, los dígitos del marcador, el fondo del menú, el cursor y los rótulos, además de los dos efectos de sonido. El archivo `include/assets.h` se genera a partir de los PNG con [`TOOLS/converter.py`](../TOOLS/converter.py) y la opción `--macros`.
 
-La carpeta [`assets/pong/`](../assets/pong) de la raíz contiene los diseños del equipo de arte (menús y pantallas de partida de referencia, con dígitos y paletas distintos a los del juego). El juego usa solo `pong/assets/`.
+La misma carpeta guarda los diseños del equipo de arte (`MainMenuV1`, `MainMenuV2`, `PauseMenu` y `PongPlaying`); el juego aún no los usa. `Player2` mide 2×10, igual que la paleta de la lógica del juego.
 
 ## Límites conocidos
 
