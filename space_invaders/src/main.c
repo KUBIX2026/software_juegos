@@ -2,7 +2,7 @@
 // Flujo de pantallas segun docs/diagramas/Diagrama logica juegos.png:
 // menu -> "Press start" -> partida por oleadas -> pausa / fin de partida.
 // La logica avanza en pasos fijos de TICK_MS. Las posiciones siguen la maqueta
-// assets/spaceInvaders/SpaceInvadersPlaying.png.
+// space_invaders/assets/SpaceInvadersPlaying.png.
 
 #include <string.h>
 

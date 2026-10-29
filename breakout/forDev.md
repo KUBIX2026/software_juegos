@@ -50,10 +50,10 @@ Abre **Visual Studio**, elige **Open a local folder** y selecciona la carpeta `b
 
 ## Regenerar los sprites
 
-Los sprites de `include/assets.h` se generan a partir de los PNG de [`assets/breakout`](../assets/breakout) con la herramienta del repositorio. Desde la raíz del repositorio (requiere Python con Pillow):
+Los sprites de `include/assets.h` se generan a partir de los PNG de [`breakout/assets`](./assets) con la herramienta del repositorio. Desde la raíz del repositorio (requiere Python con Pillow):
 
 ```bash
-python3 TOOLS/converter.py -i assets/breakout -o breakout/include/assets.h --exclude BreakoutPlaying MainMenuV1
+python3 TOOLS/converter.py -i breakout/assets -o breakout/include/assets.h --exclude BreakoutPlaying MainMenuV1
 ```
 
 `converter.py` reescribe `assets.h` completo, cabecera incluida, así que se puede ejecutar las veces que haga falta. Los PNG con transparencia (canal alfa o el color `#0F081F`) quedan con el color transparente `0x0843`.

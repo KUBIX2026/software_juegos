@@ -8,8 +8,8 @@ int main(int argc, char *argv[]) {
     return 1;
   }
   SoundID move_sound =
-      initSound("../../assets/halSimulator/mixkit-video-game-retro-click-237.wav");
-  SoundID menu_sound = initSound("../../assets/halSimulator/mixkit-game-ball-tap-2073.wav");
+      initSound("../assets/mixkit-video-game-retro-click-237.wav");
+  SoundID menu_sound = initSound("../assets/mixkit-game-ball-tap-2073.wav");
 
   int running = 1;
   uint8_t x = 0;

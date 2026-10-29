@@ -53,7 +53,7 @@ En la pausa, **A** (o Enter) reanuda y **B** vuelve al menú. La tecla A tambié
 
 ## Diseño visual
 
-El juego usa los sprites de [`assets/snake`](../assets/snake), convertidos a `include/assets.h`.
+El juego usa los sprites de [`snake/assets`](./assets), convertidos a `include/assets.h`.
 
 <div align="center">
   <img width="428" height="288" alt="Paleta de assets de Snake" src="./img/assets_snake.png" />
@@ -70,7 +70,7 @@ El juego usa los sprites de [`assets/snake`](../assets/snake), convertidos a `in
 | `SnakeLateral2Playing` | Panel de puntaje del jugador 1 (verde). |
 | `SnakeLateral1Playing` | Panel de puntaje del jugador 2 (azul). |
 
-`MainMenuV1` (menú con íconos) y `SnakePlaying` (maqueta de la partida) están en `assets/snake` pero el juego no los usa, así que se omiten al generar `assets.h` (`--exclude`) y no ocupan memoria.
+`MainMenuV1` (menú con íconos) y `SnakePlaying` (maqueta de la partida) están en `snake/assets` pero el juego no los usa, así que se omiten al generar `assets.h` (`--exclude`) y no ocupan memoria.
 
 ## Estructura del proyecto
 

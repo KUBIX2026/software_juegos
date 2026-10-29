@@ -56,7 +56,7 @@ Durante el recorrido, el jugador debe:
 
 ## Diseño visual
 
-El juego usa los sprites de [`assets/roadFighters`](../assets/roadFighters), convertidos a `include/assets.h`. La estética se inspira en las máquinas arcade de carreras de los años 80.
+El juego usa los sprites de [`roadFighter/assets`](./assets), convertidos a `include/assets.h`. La estética se inspira en las máquinas arcade de carreras de los años 80.
 
 <div align="center">
   <img width="428" height="288" alt="Paleta de assets de Road Fighter" src="./img/assets_road_fighter.png" />
@@ -72,7 +72,7 @@ El juego usa los sprites de [`assets/roadFighters`](../assets/roadFighters), con
 | `BlueCar`, `YellowCar`, `Truck` | Vehículos del tráfico. |
 | `CarDestroyed` | Auto del jugador tras un choque. |
 
-`CarFront`, `Crash1`, `Crash2`, `Crash3`, `MainMenuV2` y `RoadFighterPlaying` están en `assets/roadFighters` pero el juego no los usa, así que se omiten al generar `assets.h` (`--exclude`) y no ocupan memoria. `Road` solo se usa en una pantalla de ajustes a la que aún no se llega desde el juego.
+`CarFront`, `Crash1`, `Crash2`, `Crash3`, `MainMenuV2` y `RoadFighterPlaying` están en `roadFighter/assets` pero el juego no los usa, así que se omiten al generar `assets.h` (`--exclude`) y no ocupan memoria. `Road` solo se usa en una pantalla de ajustes a la que aún no se llega desde el juego.
 
 ## Estructura del proyecto
 

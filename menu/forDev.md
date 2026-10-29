@@ -46,10 +46,10 @@ Si un juego se compiló antes por separado con otro generador de CMake (por ejem
 
 ## Regenerar los sprites
 
-Los sprites de `include/assets.h` se generan a partir de los PNG de [`assets/Menus`](../assets/Menus). Desde la raíz del repositorio (requiere Python con Pillow):
+Los sprites de `include/assets.h` se generan a partir de los PNG de [`menu/assets`](./assets). Desde la raíz del repositorio (requiere Python con Pillow):
 
 ```bash
-python3 TOOLS/converter.py -i assets/Menus -o menu/include/assets.h
+python3 TOOLS/converter.py -i menu/assets -o menu/include/assets.h
 ```
 
 `converter.py` reescribe `assets.h` completo, cabecera incluida, así que se puede ejecutar las veces que haga falta. Los PNG con transparencia (canal alfa o el color `#0F081F`) quedan con el color transparente `0x0843`.

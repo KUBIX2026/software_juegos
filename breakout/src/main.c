@@ -2,7 +2,7 @@
 // Flujo de pantallas segun docs/diagramas/Diagrama logica juegos.png:
 // menu -> "Press start" -> partida por muros -> pausa / fin de partida.
 // La logica avanza en pasos fijos de TICK_MS. Las posiciones siguen la maqueta
-// assets/breakout/BreakoutPlaying.png.
+// breakout/assets/BreakoutPlaying.png.
 
 #include <stdlib.h>
 #include <string.h>

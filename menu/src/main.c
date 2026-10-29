@@ -129,7 +129,7 @@ static int findGame(const char *root, const GameEntry *game, char *exe,
 }
 
 // Ejecuta el juego desde su carpeta (Pong y Tetris cargan sonidos de
-// ../../assets/<juego>) y espera a que termine, con la ventana del menu oculta.
+// ../assets) y espera a que termine, con la ventana del menu oculta.
 static void runGame(const GameEntry *game, const char *exe, const char *dir) {
   char command[4 * PATH_LEN];
 #ifdef _WIN32

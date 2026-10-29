@@ -50,10 +50,10 @@ Abre **Visual Studio**, elige **Open a local folder** y selecciona la carpeta `s
 
 ## Regenerar los sprites
 
-Los sprites de `include/assets.h` se generan a partir de los PNG de [`assets/spaceInvaders`](../assets/spaceInvaders) con la herramienta del repositorio. Desde la raíz del repositorio (requiere Python con Pillow):
+Los sprites de `include/assets.h` se generan a partir de los PNG de [`space_invaders/assets`](./assets) con la herramienta del repositorio. Desde la raíz del repositorio (requiere Python con Pillow):
 
 ```bash
-python3 TOOLS/converter.py -i assets/spaceInvaders -o space_invaders/include/assets.h --exclude MainMenuV1 SpaceInvadersPlaying
+python3 TOOLS/converter.py -i space_invaders/assets -o space_invaders/include/assets.h --exclude MainMenuV1 SpaceInvadersPlaying
 ```
 
 `converter.py` reescribe `assets.h` completo, cabecera incluida, así que se puede ejecutar las veces que haga falta. Los PNG con transparencia (canal alfa o el color `#0F081F`) quedan con el color transparente `0x0843`.

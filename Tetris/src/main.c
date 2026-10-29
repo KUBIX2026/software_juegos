@@ -74,12 +74,12 @@ static uint32_t best_scores[TETRIS_TOP_N];
 static void backToGeneralMenu(int *running) { *running = 0; }
 
 static void loadSounds(void) {
-  sound_rotate = initSound("../../assets/Tetris/tetris_rotar.wav");
-  sound_lock = initSound("../../assets/Tetris/tetris_fijar.wav");
-  sound_line = initSound("../../assets/Tetris/tetris_linea.wav");
-  sound_four = initSound("../../assets/Tetris/tetris_cuatro.wav");
-  sound_level = initSound("../../assets/Tetris/tetris_nivel.wav");
-  sound_end = initSound("../../assets/Tetris/tetris_fin.wav");
+  sound_rotate = initSound("../assets/tetris_rotar.wav");
+  sound_lock = initSound("../assets/tetris_fijar.wav");
+  sound_line = initSound("../assets/tetris_linea.wav");
+  sound_four = initSound("../assets/tetris_cuatro.wav");
+  sound_level = initSound("../assets/tetris_nivel.wav");
+  sound_end = initSound("../assets/tetris_fin.wav");
 }
 
 // Un sonido por jugada: si se limpiaron lineas suena eso en lugar del golpe de

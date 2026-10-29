@@ -63,7 +63,7 @@ Cada jugador mueve la paleta solo en su turno. En la pausa, **A** (o Enter) rean
 
 ## Diseño visual
 
-El juego usa los sprites de [`assets/breakout`](../assets/breakout), convertidos a `include/assets.h`. Las posiciones del muro y de la paleta siguen la maqueta `BreakoutPlaying`.
+El juego usa los sprites de [`breakout/assets`](./assets), convertidos a `include/assets.h`. Las posiciones del muro y de la paleta siguen la maqueta `BreakoutPlaying`.
 
 <div align="center">
   <img width="428" height="332" alt="Paleta de assets de Breakout" src="./img/assets_breakout.png" />
@@ -81,7 +81,7 @@ El juego usa los sprites de [`assets/breakout`](../assets/breakout), convertidos
 | `LifeIcon`, `LifeIcon2` | Vidas de cada jugador. |
 | `Num0`…`Num9` | Números del marcador. |
 
-`MainMenuV1` (menú con íconos) y `BreakoutPlaying` (maqueta de la partida) están en `assets/breakout` pero el juego no los usa, así que se omiten al generar `assets.h` (`--exclude`) y no ocupan memoria.
+`MainMenuV1` (menú con íconos) y `BreakoutPlaying` (maqueta de la partida) están en `breakout/assets` pero el juego no los usa, así que se omiten al generar `assets.h` (`--exclude`) y no ocupan memoria.
 
 ## Estructura del proyecto
 

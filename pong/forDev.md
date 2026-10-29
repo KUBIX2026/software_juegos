@@ -40,7 +40,7 @@ cmake ..
 cmake --build .
 ```
 
-Ejecuta el juego **desde la carpeta `build`**: los sonidos se buscan en `../../assets/pong`.
+Ejecuta el juego **desde la carpeta `build`**: los sonidos se buscan en `../assets`.
 
 ## Probar la lógica (sin SDL2)
 
@@ -61,11 +61,11 @@ Con `-v` imprime también las pruebas que pasan. El programa termina con código
 
 ## Regenerar los sprites
 
-`include/assets.h` se genera a partir de los PNG de [`assets/pong`](../assets/pong) con la herramienta del repositorio. Desde la raíz del repositorio (requiere Python y Pillow):
+`include/assets.h` se genera a partir de los PNG de [`pong/assets`](./assets) con la herramienta del repositorio. Desde la raíz del repositorio (requiere Python y Pillow):
 
 ```bash
 pip install pillow
-python3 TOOLS/converter.py -i assets/pong -o pong/include/assets.h --macros --exclude MainMenuV1 MainMenuV2 PauseMenu PongPlaying
+python3 TOOLS/converter.py -i pong/assets -o pong/include/assets.h --macros --exclude MainMenuV1 MainMenuV2 PauseMenu PongPlaying
 ```
 
 El píxel transparente (canal alfa o el color `#0F081F`) se escribe como `0x0843`, el color que `sendSprite()` omite. `--macros` agrega las macros `Nombre_W` y `Nombre_H` con el tamaño de cada sprite. `--exclude` omite los 4 menús de diseño del equipo de arte, que el juego no usa y no deben ocupar memoria.

@@ -23,7 +23,7 @@ Menú de inicio de la consola. Muestra la pantalla de espera, deja elegir un jue
 
 ## Diseño visual
 
-El menú usa los fondos de [`assets/Menus`](../assets/Menus), convertidos a `include/assets.h`. El borde de la ficha elegida y las flechas de página se dibujan por código.
+El menú usa los fondos de [`menu/assets`](./assets), convertidos a `include/assets.h`. El borde de la ficha elegida y las flechas de página se dibujan por código.
 
 <div align="center">
   <img width="428" height="148" alt="Paleta de assets del menú" src="./img/assets_menu.png" />
@@ -48,7 +48,7 @@ Para volver al menú desde un juego, se sale del juego: en Snake, Space Invaders
 
 ## Cómo se abren los juegos
 
-En el simulador cada juego es un programa aparte. El menú busca el ejecutable en la carpeta `build` de cada juego (también en `build/Release` y `build/Debug`, donde lo deja Visual Studio), oculta su ventana, lo ejecuta desde esa carpeta y espera a que termine. Ejecutarlo desde su carpeta `build` es necesario porque Pong y Tetris cargan sus sonidos desde `../../assets/<juego>`.
+En el simulador cada juego es un programa aparte. El menú busca el ejecutable en la carpeta `build` de cada juego (también en `build/Release` y `build/Debug`, donde lo deja Visual Studio), oculta su ventana, lo ejecuta desde esa carpeta y espera a que termine. Ejecutarlo desde su carpeta `build` es necesario porque Pong y Tetris cargan sus sonidos desde `../assets`.
 
 Cada juego ya tiene un punto de enganche para esto: su función `backToGeneralMenu()` termina el programa, y con eso se vuelve al menú.
 
@@ -56,7 +56,7 @@ En la FPGA no habrá programas separados, así que ahí el menú y los juegos te
 
 ## Agregar un juego
 
-1. Agregar su ficha a `GameSelector2.png` (o a una página nueva) en [`assets/Menus`](../assets/Menus) y regenerar `include/assets.h`.
+1. Agregar su ficha a `GameSelector2.png` (o a una página nueva) en [`menu/assets`](./assets) y regenerar `include/assets.h`.
 2. Agregar el juego a la lista `games` de `src/main.c`, en el mismo orden que las fichas: nombre, carpeta y nombre del ejecutable.
 3. Agregar su carpeta a la lista de juegos de `CMakeLists.txt`.
 

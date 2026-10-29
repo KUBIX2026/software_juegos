@@ -61,7 +61,7 @@ Solo puede haber un disparo de cada nave en pantalla; mantener el botón vuelve 
 
 ## Diseño visual
 
-El juego usa los sprites de [`assets/spaceInvaders`](../assets/spaceInvaders), convertidos a `include/assets.h`.
+El juego usa los sprites de [`space_invaders/assets`](./assets), convertidos a `include/assets.h`.
 
 <div align="center">
   <img width="428" height="344" alt="Paleta de assets de Space Invaders" src="./img/assets_space_invaders.png" />
@@ -81,7 +81,7 @@ El juego usa los sprites de [`assets/spaceInvaders`](../assets/spaceInvaders), c
 | `PlayerBullet`, `AlienBullet1/2` | Disparos. |
 | `LifeIcon`, `Num0`…`Num9` | Vidas y números del marcador. |
 
-`MainMenuV1` (menú con íconos) y `SpaceInvadersPlaying` (maqueta de la partida) están en `assets/spaceInvaders` pero el juego no los usa, así que se omiten al generar `assets.h` (`--exclude`) y no ocupan memoria.
+`MainMenuV1` (menú con íconos) y `SpaceInvadersPlaying` (maqueta de la partida) están en `space_invaders/assets` pero el juego no los usa, así que se omiten al generar `assets.h` (`--exclude`) y no ocupan memoria.
 
 ## Estructura del proyecto
 

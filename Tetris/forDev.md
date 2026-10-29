@@ -40,7 +40,7 @@ cmake ..
 cmake --build .
 ```
 
-Ejecuta el juego **desde la carpeta `build`**: los sonidos se buscan en `../../assets/Tetris`.
+Ejecuta el juego **desde la carpeta `build`**: los sonidos se buscan en `../assets`.
 
 ## Probar la lógica (sin SDL2)
 
@@ -61,11 +61,11 @@ Con `-v` imprime también las pruebas que pasan. El programa termina con código
 
 ## Regenerar los sprites
 
-`include/assets.h` se genera a partir de los PNG de [`assets/Tetris`](../assets/Tetris) con la herramienta del repositorio. Desde la raíz del repositorio (requiere Python y Pillow):
+`include/assets.h` se genera a partir de los PNG de [`Tetris/assets`](./assets) con la herramienta del repositorio. Desde la raíz del repositorio (requiere Python y Pillow):
 
 ```bash
 pip install pillow
-python3 TOOLS/converter.py -i assets/Tetris -o Tetris/include/assets.h --macros
+python3 TOOLS/converter.py -i Tetris/assets -o Tetris/include/assets.h --macros
 ```
 
 El píxel transparente (canal alfa o el color `#0F081F`) se escribe como `0x0843`, el color que `sendSprite()` omite. `--macros` agrega las macros `Nombre_W` y `Nombre_H` con el tamaño de cada sprite.
