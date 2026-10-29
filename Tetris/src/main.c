@@ -1,5 +1,5 @@
 // Tetris para KUBIX.
-// Flujo de pantallas segun docs/diagramas/Diagrama menu e inicio de juego.png:
+// Flujo de pantallas segun docs/diagramas/Diagrama logica juegos.png:
 // submenu (Singleplayer, Tutorial, Scores, Exit) -> "Press start to play" ->
 // partida -> fin con score. Multiplayer no aplica: Tetris es de un jugador.
 // Las reglas estan en tetris_logica.c y no dependen de SDL.

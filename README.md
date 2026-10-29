@@ -23,7 +23,7 @@ Este repositorio contiene:
 | Space Invaders | [`space_invaders`](./space_invaders) | Prototipo funcional |
 | Pong | [`pong`](./pong) | Prototipo funcional |
 | Breakout | [`breakout`](./breakout) | Prototipo funcional |
-| Tetris | [`tetris`](./tetris) | Prototipo funcional |
+| Tetris | [`Tetris`](./Tetris) | Prototipo funcional |
 
 ---
 
@@ -39,8 +39,12 @@ cmake --build .
 ./kubix
 ```
 ---
-## Flujo de menus
-<img width="1014" height="586" alt="Diagrama de Flujo-Software_juegos" src="https://github.com/user-attachments/assets/378218cb-46fc-468e-992b-5d39ec3ffed0" />
+
+## Mapa de pantallas
+
+![Mapa de pantallas de KUBIX](<./docs/diagramas/Mapa de pantallas.png>)
+
+Maqueta visual de las pantallas de la consola: pantalla de espera, selector de juegos, menú de cada juego, partida y pausa (muestra Breakout, Road Fighter, Snake y Pong). Complementa al diagrama lógico de la sección siguiente.
 
 
 ---

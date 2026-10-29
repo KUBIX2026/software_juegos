@@ -220,4 +220,4 @@ Estos recursos incluyen los sprites de la cancha, las paletas, la pelota, los d�
 - Los puntajes se guardan solo en memoria mientras corre el juego y no piden nombre.
 - La fuente de 3×5 del HAL no dibuja bien la `W`, el `7` ni el `!`. Los rótulos con `W` son sprites y el tutorial y los puntajes usan la fuente de 5×7.
 - Las opciones de los menús, la lista de puntajes y las pistas de botones siguen siendo texto de la fuente del HAL, porque cambian de contenido.
-- El menú general de KUBIX no existe todavía como código en el repositorio. La función `backToGeneralMenu()` de [`src/main.c`](./src/main.c) es el punto de enganche y hoy termina el programa.
+- El menú general de KUBIX está en [`menu`](../menu) y abre este juego como un programa aparte. La función `backToGeneralMenu()` de [`src/main.c`](./src/main.c) es el punto de enganche: hoy termina el programa y con eso se vuelve al menú; en la FPGA el menú y los juegos tendrán que compilarse juntos.

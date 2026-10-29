@@ -255,4 +255,4 @@ Siguen la convención de assets del repositorio: el color `#0F081F` (o la transp
 - El simulador del HAL no lee el botón Select, por eso no hay "guardar pieza".
 - La fuente de 3×5 del HAL no dibuja bien la `W`, el `7` ni el `!`. Por eso el puntaje y el nivel usarán dígitos propios como sprites.
 - Los puntajes se guardarán solo en memoria mientras corre el juego.
-- El menú general de KUBIX no existe todavía como código en el repositorio.
+- El menú general de KUBIX está en [`menu`](../menu) y abre este juego como un programa aparte. Hoy `backToGeneralMenu()` de [`src/main.c`](./src/main.c) termina el programa y con eso se vuelve al menú; en la FPGA el menú y los juegos tendrán que compilarse juntos.

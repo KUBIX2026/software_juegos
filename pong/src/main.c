@@ -1,5 +1,5 @@
 // Pong para KUBIX.
-// Flujo de pantallas segun docs/diagramas/Diagrama menu e inicio de juego.png:
+// Flujo de pantallas segun docs/diagramas/Diagrama logica juegos.png:
 // submenu (Singleplayer, Multiplayer, Tutorial, Scores, Exit) -> "Press start
 // to play" -> partida -> fin con score. La logica de las reglas esta en
 // pong_logica.c y no depende de SDL.
