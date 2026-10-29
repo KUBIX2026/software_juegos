@@ -1,4 +1,6 @@
 # Software de juegos KUBIX
+## Presentación
+https://canva.link/52dbn06ooll7m37
 
 Repositorio del software de juegos desarrollado para KUBIX, una plataforma retro basada en un sistema con CPU, memoria, pantalla, controles y audio.
 
