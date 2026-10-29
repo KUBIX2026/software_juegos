@@ -9,7 +9,7 @@ Convierte los PNG de una carpeta de assets en el archivo `include/assets.h` de u
 Requiere Python y Pillow (`pip install pillow`). Se ejecuta desde la raíz del repositorio:
 
 ```bash
-python3 TOOLS/converter.py -i assets/snake -o snake/include/assets.h
+python3 TOOLS/converter.py -i assets/snake -o snake/include/assets.h --exclude MainMenuV1 SnakePlaying
 python3 TOOLS/converter.py -i assets/Tetris -o Tetris/include/assets.h --macros
 python3 TOOLS/converter.py -i assets/pong -o pong/include/assets.h --macros --exclude MainMenuV1 MainMenuV2 PauseMenu PongPlaying
 ```
@@ -28,3 +28,19 @@ Cómo se comporta:
 - **Los sprites salen en orden alfabético** y el nombre del arreglo es el del archivo, que debe ser un identificador válido de C.
 - **Si algo falla, no escribe nada:** una carpeta que no existe, un PNG ilegible, un nombre no válido, una carpeta sin PNG o un sprite de más de 255 píxeles por lado. Avisa con `ERROR:` y termina con código distinto de cero.
 - **Conserva los saltos de línea** (CRLF o LF) del archivo de salida si ya existe, para que `git diff` solo muestre los sprites que cambiaron.
+
+## Comandos de cada juego
+
+Desde la raíz del repositorio:
+
+```bash
+python3 TOOLS/converter.py -i assets/roadFighters -o roadFighter/include/assets.h --exclude CarFront Crash1 Crash2 Crash3 MainMenuV2 RoadFighterPlaying
+python3 TOOLS/converter.py -i assets/snake -o snake/include/assets.h --exclude MainMenuV1 SnakePlaying
+python3 TOOLS/converter.py -i assets/spaceInvaders -o space_invaders/include/assets.h --exclude MainMenuV1 SpaceInvadersPlaying
+python3 TOOLS/converter.py -i assets/breakout -o breakout/include/assets.h --exclude BreakoutPlaying MainMenuV1
+python3 TOOLS/converter.py -i assets/pong -o pong/include/assets.h --macros --exclude MainMenuV1 MainMenuV2 PauseMenu PongPlaying
+python3 TOOLS/converter.py -i assets/Tetris -o Tetris/include/assets.h --macros
+python3 TOOLS/converter.py -i assets/Menus -o menu/include/assets.h
+```
+
+Los sprites que se omiten con `--exclude` siguen en `assets/`. Para usarlos en un juego, se quitan de su lista y se vuelve a generar `assets.h`.

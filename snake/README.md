@@ -70,7 +70,7 @@ El juego usa los sprites de [`assets/snake`](../assets/snake), convertidos a `in
 | `SnakeLateral2Playing` | Panel de puntaje del jugador 1 (verde). |
 | `SnakeLateral1Playing` | Panel de puntaje del jugador 2 (azul). |
 
-`MainMenuV1` (menú con íconos) y `SnakePlaying` (maqueta de la partida) se incluyen en `assets.h` pero no se usan.
+`MainMenuV1` (menú con íconos) y `SnakePlaying` (maqueta de la partida) están en `assets/snake` pero el juego no los usa, así que se omiten al generar `assets.h` (`--exclude`) y no ocupan memoria.
 
 ## Estructura del proyecto
 

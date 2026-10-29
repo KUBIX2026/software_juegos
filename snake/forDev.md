@@ -53,7 +53,7 @@ Abre **Visual Studio**, elige **Open a local folder** y selecciona la carpeta `s
 Los sprites de `include/assets.h` se generan a partir de los PNG de [`assets/snake`](../assets/snake) con la herramienta del repositorio. Desde la raíz del repositorio (requiere Python con Pillow):
 
 ```bash
-python3 TOOLS/converter.py -i assets/snake -o snake/include/assets.h
+python3 TOOLS/converter.py -i assets/snake -o snake/include/assets.h --exclude MainMenuV1 SnakePlaying
 ```
 
 `converter.py` reescribe `assets.h` completo, cabecera incluida, así que se puede ejecutar las veces que haga falta. Los PNG con transparencia (canal alfa o el color `#0F081F`) quedan con el color transparente `0x0843`.

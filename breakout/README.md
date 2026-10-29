@@ -81,7 +81,7 @@ El juego usa los sprites de [`assets/breakout`](../assets/breakout), convertidos
 | `LifeIcon`, `LifeIcon2` | Vidas de cada jugador. |
 | `Num0`…`Num9` | Números del marcador. |
 
-`MainMenuV1` (menú con íconos) y `BreakoutPlaying` (maqueta de la partida) se incluyen en `assets.h` pero no se usan.
+`MainMenuV1` (menú con íconos) y `BreakoutPlaying` (maqueta de la partida) están en `assets/breakout` pero el juego no los usa, así que se omiten al generar `assets.h` (`--exclude`) y no ocupan memoria.
 
 ## Estructura del proyecto
 

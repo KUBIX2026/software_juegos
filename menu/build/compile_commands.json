@@ -1,8 +1,0 @@
-[
-{
-  "directory": "/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/build",
-  "command": "/usr/bin/cc -DKUBIX_ROOT=\"\\\"/mnt/c/Users/MARLON CARRILLO/source/software_juegos\\\"\" -I\"/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/include\" -I/usr/include/.. -isystem /usr/include/SDL2  -o CMakeFiles/kubix.dir/src/main.c.o -c \"/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/src/main.c\"",
-  "file": "/mnt/c/Users/MARLON CARRILLO/source/software_juegos/menu/src/main.c",
-  "output": "CMakeFiles/kubix.dir/src/main.c.o"
-}
-]

@@ -60,11 +60,10 @@ static void advanceScroll(uint8_t *offset, uint8_t speed,
 }
 
 static void drawGame(uint8_t player_x, uint8_t player_y,
-                     const TrafficCar traffic[], unsigned collisions,
+                     const TrafficCar traffic[],
                      uint32_t elapsed_seconds, uint16_t distance_meters,
                      uint8_t game_finished, uint8_t player_crash_timer,
                      const uint16_t *fence_layer, const uint16_t *line_layer) {
-  char count_text[4];
   char time_text[16];
   char distance_text[8];
 
@@ -99,8 +98,15 @@ static void drawGame(uint8_t player_x, uint8_t player_y,
   snprintf(distance_text, sizeof(distance_text), "%03u",
            (unsigned)distance_meters);
   sendString(distance_text, 48, 16, 3, 5);
-  if (game_finished)
-    sendString("FINISH!", 11, 31, 3, 5);
+  if (game_finished) {
+    // Franja negra para que el texto se lea sobre las lineas de la carretera.
+    // La fuente 3x5 del HAL no tiene el simbolo "!": se dibujaria como una "I".
+    uint16_t banner[25 * 7];
+    for (int i = 0; i < 25 * 7; ++i)
+      banner[i] = 0x0000;
+    sendSprite(banner, 12, 30, 25, 7);
+    sendString("FINISH", 13, 31, 3, 5);
+  }
 }
 
 static int carsOverlap(uint8_t ax, int ay, uint8_t aw, uint8_t ah, uint8_t bx,
@@ -397,7 +403,7 @@ int main(int argc, char *argv[]) {
       sendBackground(PauseMenu);
       break;
     case SCREEN_GAME:
-      drawGame(player_x, player_y, traffic, collisions, elapsed_ms / 1000,
+      drawGame(player_x, player_y, traffic, elapsed_ms / 1000,
                player_distance_units / DISTANCE_UNITS_PER_METER, game_finished,
                player_crash_timer, moving_fences, moving_lines);
       break;

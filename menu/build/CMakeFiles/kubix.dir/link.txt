@@ -1,1 +1,0 @@
-/usr/bin/cc -Wl,--dependency-file=CMakeFiles/kubix.dir/link.d CMakeFiles/kubix.dir/src/main.c.o -o kubix  /usr/lib/x86_64-linux-gnu/libSDL2.so

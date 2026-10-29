@@ -1,3 +1,4 @@
+// Generado por TOOLS/converter.py a partir de assets/*.png. No editar a mano.
 #include <stdint.h>
 #pragma once
 

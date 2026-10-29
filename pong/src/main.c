@@ -72,8 +72,8 @@ static int connectedControls(void) {
 #endif
 }
 
-// Punto de enganche con el menu general de KUBIX: hoy Pong corre solo, asi que
-// volver al menu general termina el programa.
+// Punto de enganche con el menu general de KUBIX: menu/ ejecuta este juego
+// como programa aparte, asi que volver al menu general termina el programa.
 static void backToGeneralMenu(int *running) { *running = 0; }
 
 static void playEvents(uint8_t events) {
