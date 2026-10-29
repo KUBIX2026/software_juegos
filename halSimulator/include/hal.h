@@ -20,6 +20,22 @@ struct rgb {
   uint8_t b;
 };
 
+typedef enum {
+  HAL_SCREEN_LEFT = 0,
+  HAL_SCREEN_MIDDLE = 1,
+  HAL_SCREEN_RIGHT = 2
+} HalScreen;
+
+enum {
+  HAL_PIXEL_SCALE = 8,
+  HAL_MIDDLE_WIDTH = 64,
+  HAL_MIDDLE_HEIGHT = 64,
+  HAL_SIDE_WIDTH = 8,
+  HAL_SIDE_HEIGHT = 32,
+  HAL_DISPLAY_WIDTH = HAL_SIDE_WIDTH + HAL_MIDDLE_WIDTH + HAL_SIDE_WIDTH,
+  HAL_DISPLAY_HEIGHT = HAL_MIDDLE_HEIGHT
+};
+
 struct keys {
   SDL_Keycode UP;
   SDL_Keycode DOWN;
@@ -42,10 +58,12 @@ struct keys default_keys = {.UP = SDLK_UP,
 struct rgb hex2rgb(uint16_t hexColor);
 void sendSprite(const uint16_t *sprite, uint8_t x, uint8_t y, uint8_t w,
                 uint8_t h);
+void sendSpriteToScreen(const uint16_t *sprite, uint8_t x, uint8_t y, uint8_t w,
+                        uint8_t h, HalScreen screen);
 void sendBackground(const uint16_t *sprite);
 int initScreen(int argc, char *argv[]);
 
-void sendLetter(char s, uint8_t x, uint8_t y, uint8_t w, uint8_t h);
+void sendLetter(char s, uint8_t x, uint8_t y, uint8_t w, uint8_t h, HalScreen screen);
 
 // -- Controls hal
 uint8_t readControls(int *running, struct keys *bindings);
@@ -101,15 +119,45 @@ struct rgb hex2rgb(uint16_t hexColor) {
   return color;
 }
 
-void sendSprite(const uint16_t *sprite, uint8_t x, uint8_t y, uint8_t w,
-                uint8_t h) {
+void sendSpriteToScreen(const uint16_t *sprite, uint8_t x, uint8_t y, uint8_t w,
+                        uint8_t h, HalScreen screen) {
   if (!global_renderer)
     return;
 
-  int scale = 8;
+  int origin_x;
+  int origin_y = 0;
+  int screen_width;
+  int screen_height;
+  switch (screen) {
+  case HAL_SCREEN_LEFT:
+    origin_x = 0;
+    origin_y = (HAL_MIDDLE_HEIGHT - HAL_SIDE_HEIGHT) / 2;
+    screen_width = HAL_SIDE_WIDTH;
+    screen_height = HAL_SIDE_HEIGHT;
+    break;
+  case HAL_SCREEN_MIDDLE:
+    origin_x = HAL_SIDE_WIDTH;
+    screen_width = HAL_MIDDLE_WIDTH;
+    screen_height = HAL_MIDDLE_HEIGHT;
+    break;
+  case HAL_SCREEN_RIGHT:
+    origin_x = HAL_SIDE_WIDTH + HAL_MIDDLE_WIDTH;
+    origin_y = (HAL_MIDDLE_HEIGHT - HAL_SIDE_HEIGHT) / 2;
+    screen_width = HAL_SIDE_WIDTH;
+    screen_height = HAL_SIDE_HEIGHT;
+    break;
+  default:
+    return;
+  }
 
   for (int row = 0; row < h; row++) {
+    int screen_y = (int)y + row;
+    if (screen_y >= screen_height)
+      break;
     for (int col = 0; col < w; col++) {
+      int screen_x = (int)x + col;
+      if (screen_x >= screen_width)
+        break;
       uint16_t pixelColor = sprite[row * w + col];
 
       if (pixelColor == 0x0843) {
@@ -120,21 +168,28 @@ void sendSprite(const uint16_t *sprite, uint8_t x, uint8_t y, uint8_t w,
 
       SDL_SetRenderDrawColor(global_renderer, color.r, color.g, color.b, 255);
 
-      SDL_Rect pixelRect = {.x = (x + col) * scale,
-                            .y = (y + row) * scale,
-                            .w = scale,
-                            .h = scale};
+      SDL_Rect pixelRect = {.x = (origin_x + screen_x) * HAL_PIXEL_SCALE,
+                            .y = (origin_y + screen_y) * HAL_PIXEL_SCALE,
+                            .w = HAL_PIXEL_SCALE,
+                            .h = HAL_PIXEL_SCALE};
 
       SDL_RenderFillRect(global_renderer, &pixelRect);
     }
   }
 }
 
+[[deprecated("Use sendSpriteToScreen(const uint16_t *sprite, uint8_t x, "
+             "uint8_t y, uint8_t w, uint8_t h, HalScreen screen)")]]
+void sendSprite(const uint16_t *sprite, uint8_t x, uint8_t y, uint8_t w,
+                uint8_t h) {
+  sendSpriteToScreen(sprite, x, y, w, h, HAL_SCREEN_MIDDLE);
+}
+
 void sendBackground(const uint16_t *sprite) {
-  sendSprite(sprite, 0, 0, 64, 64);
+  sendSpriteToScreen(sprite, 0, 0, 64, 64, HAL_SCREEN_MIDDLE);
 };
 
-void sendLetter(char s, uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
+void sendLetter(char s, uint8_t x, uint8_t y, uint8_t w, uint8_t h, HalScreen screen) {
   if (s < 32 || s > 126) {
     s = '?';
   }
@@ -165,14 +220,14 @@ void sendLetter(char s, uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
     }
   }
 
-  sendSprite(sprite_buffer, x, y, w, h);
+  sendSpriteToScreen(sprite_buffer, x, y, w, h, screen);
 }
 
-void sendString(char *string, uint8_t x, uint8_t y, uint8_t w, uint8_t h) {
+void sendString(char *string, uint8_t x, uint8_t y, uint8_t w, uint8_t h, HalScreen screen) {
   uint8_t text_spacing = 1;
   int len = strlen(string);
   for (uint8_t i = 0; i < len; i++) {
-    sendLetter(string[i], x + (i * (w + text_spacing)), y, w, h);
+    sendLetter(string[i], x + (i * (w + text_spacing)), y, w, h, screen);
   }
 }
 
@@ -183,12 +238,13 @@ int initScreen(int argc, char *argv[]) {
     return 1;
   }
   SDL_Window *window = NULL;
-  if (SDL_CreateWindowAndRenderer(64 * 8, 64 * 8, 0, &window,
-                                  &global_renderer) < 0) {
+  if (SDL_CreateWindowAndRenderer(HAL_DISPLAY_WIDTH * HAL_PIXEL_SCALE,
+                                  HAL_DISPLAY_HEIGHT * HAL_PIXEL_SCALE, 0,
+                                  &window, &global_renderer) < 0) {
     SDL_Quit();
     return 1;
   }
-  SDL_SetWindowTitle(window, "USG Library - SDL2 Simulation");
+  SDL_SetWindowTitle(window, "KUBIX_SIM");
   return 0;
 };
 
@@ -329,7 +385,7 @@ void playSound(SoundID audio_id) {
 #define HW_DISPLAY_FB ((volatile uint16_t *)DISPLAY_FB_BASE)
 #define HW_I2S_AUDIO ((volatile uint32_t *)I2S_BASE)
 
-#define SCREEN_WIDTH 512
+#define SCREEN_WIDTH (HAL_DISPLAY_WIDTH * HAL_PIXEL_SCALE)
 
 void sendSprite(const uint16_t *spriteAddress, uint8_t x, uint8_t y, uint8_t w,
                 uint8_t h) {
@@ -337,6 +393,16 @@ void sendSprite(const uint16_t *spriteAddress, uint8_t x, uint8_t y, uint8_t w,
   // DIR_Y = y;
   // BC = 0;
   // SPR_DIR = spriteAddress;
+};
+
+void sendSpriteToScreen(const uint16_t *spriteAddress, uint8_t x, uint8_t y,
+                        uint8_t w, uint8_t h, HalScreen screen) {
+  (void)spriteAddress;
+  (void)x;
+  (void)y;
+  (void)w;
+  (void)h;
+  (void)screen;
 };
 
 void sendBackground(const uint16_t *spriteAddress) {

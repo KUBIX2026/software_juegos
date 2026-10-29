@@ -72,17 +72,17 @@ int main(int argc, char *argv[]) {
     switch (current_screen) {
     case SCREEN_MENU:
       sendBackground(bc_sample);
-      // FEATURE: We need something to be able to center it or select the text
-      // from the center.
-      sendString("Menu", 5, 5, 5, 7);
+      // FEATURE: We need something to be able to center.
+      sendString("Menu", 5, 5, 5, 7, HAL_SCREEN_MIDDLE);
       break;
     case SCREEN_GAME:
       sendBackground(bc_sample);
-      sendSprite(sample, x, y, 8, 8);
+      sendSpriteToScreen(sample, x, y, 8, 8, HAL_SCREEN_MIDDLE);
       break;
 
     case SCREEN_SETTINGS:
       sendBackground(bc_sample);
+      sendSpriteToScreen(sample, 0, 0, 8, 8, HAL_SCREEN_LEFT);
       break;
     }
 
