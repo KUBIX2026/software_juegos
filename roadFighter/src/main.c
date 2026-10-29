@@ -6,8 +6,20 @@ typedef enum {
   SCREEN_PAUSE,
   SCREEN_STARTMENU,
   SCREEN_GAME,
-  SCREEN_SETTINGS
+  SCREEN_SETTINGS,
+  SCREEN_TUTORIAL,
+  SCREEN_SCORES
 } AppScreen;
+
+// Opciones del menu segun el diagrama. No hay Multiplayer: el juego es de un
+// solo jugador.
+typedef enum {
+  MENU_SINGLEPLAYER,
+  MENU_TUTORIAL,
+  MENU_SCORES,
+  MENU_EXIT,
+  MENU_COUNT
+} MenuItem;
 
 enum {
   SCREEN_SIZE = 64,
@@ -22,7 +34,19 @@ enum {
   DISTANCE_GOAL_METERS = 200,
   DISTANCE_UNITS_PER_METER = 60,
   DISTANCE_UNITS_PER_PIXEL = 15,
-  TRAFFIC_AFTER_GOAL_UNITS = (SCREEN_SIZE + 21) * DISTANCE_UNITS_PER_PIXEL
+  TRAFFIC_AFTER_GOAL_UNITS = (SCREEN_SIZE + 21) * DISTANCE_UNITS_PER_PIXEL,
+  MENU_CLEAR_Y = 29, // desde esta fila se borran los iconos dibujados en MainMenu
+  MENU_LIST_Y = 31,  // primera opcion de la lista
+  MENU_STEP = 8,
+  MENU_CURSOR_X = 4,
+  MENU_TEXT_X = 11,
+  TOP_N = 5,         // tiempos que guarda la tabla de mejores
+  FINISH_WAIT = 40,  // cuadros sin aceptar botones al llegar a la meta
+  BLACK_H = 40,      // alto del recuadro negro mas grande que se dibuja
+  CHAR_W = 3,        // fuente pequena 3x5: no dibuja bien la W, la M, la U ni el 7
+  CHAR_H = 5,
+  BIG_W = 5,         // fuente 5x7
+  BIG_H = 7
 };
 
 typedef struct {
@@ -62,8 +86,9 @@ static void advanceScroll(uint8_t *offset, uint8_t speed,
 static void drawGame(uint8_t player_x, uint8_t player_y,
                      const TrafficCar traffic[],
                      uint32_t elapsed_seconds, uint16_t distance_meters,
-                     uint8_t game_finished, uint8_t player_crash_timer,
-                     const uint16_t *fence_layer, const uint16_t *line_layer) {
+                     uint8_t game_finished, uint8_t show_hint,
+                     uint8_t player_crash_timer, const uint16_t *fence_layer,
+                     const uint16_t *line_layer) {
   char time_text[16];
   char distance_text[8];
 
@@ -101,11 +126,13 @@ static void drawGame(uint8_t player_x, uint8_t player_y,
   if (game_finished) {
     // Franja negra para que el texto se lea sobre las lineas de la carretera.
     // La fuente 3x5 del HAL no tiene el simbolo "!": se dibujaria como una "I".
-    uint16_t banner[25 * 7];
-    for (int i = 0; i < 25 * 7; ++i)
+    uint16_t banner[29 * 15];
+    for (int i = 0; i < 29 * 15; ++i)
       banner[i] = 0x0000;
-    sendSprite(banner, 12, 30, 25, 7);
+    sendSprite(banner, 10, 30, 29, show_hint ? 15 : 7);
     sendString("FINISH", 13, 31, 3, 5);
+    if (show_hint)
+      sendString("A: BACK", 11, 39, 3, 5);
   }
 }
 
@@ -196,193 +223,340 @@ static void updatePlayer(uint8_t controls, uint8_t *x, uint8_t *y,
   *moving_forward = 1;
 }
 
+// FEATURE: I want the cars to be at a random position.
+static const TrafficCar traffic_template[TRAFFIC_COUNT] = {
+    {.sprite = BlueCar,
+     .goal_percent = 5,
+     .lane = 0,
+     .width = CAR_WIDTH,
+     .height = CAR_HEIGHT},
+    {.sprite = YellowCar,
+     .goal_percent = 10,
+     .lane = 2,
+     .width = CAR_WIDTH,
+     .height = CAR_HEIGHT},
+    {.sprite = Truck,
+     .goal_percent = 15,
+     .lane = 1,
+     .width = 9,
+     .height = 21},
+    {.sprite = YellowCar,
+     .goal_percent = 20,
+     .lane = 0,
+     .width = CAR_WIDTH,
+     .height = CAR_HEIGHT},
+    {.sprite = BlueCar,
+     .goal_percent = 25,
+     .lane = 2,
+     .width = CAR_WIDTH,
+     .height = CAR_HEIGHT},
+    {.sprite = BlueCar,
+     .goal_percent = 30,
+     .lane = 1,
+     .width = CAR_WIDTH,
+     .height = CAR_HEIGHT},
+    {.sprite = Truck,
+     .goal_percent = 35,
+     .lane = 0,
+     .width = 9,
+     .height = 21},
+    {.sprite = YellowCar,
+     .goal_percent = 40,
+     .lane = 2,
+     .width = CAR_WIDTH,
+     .height = CAR_HEIGHT},
+    {.sprite = BlueCar,
+     .goal_percent = 45,
+     .lane = 1,
+     .width = CAR_WIDTH,
+     .height = CAR_HEIGHT},
+    {.sprite = BlueCar,
+     .goal_percent = 50,
+     .lane = 0,
+     .width = CAR_WIDTH,
+     .height = CAR_HEIGHT},
+    {.sprite = Truck,
+     .goal_percent = 55,
+     .lane = 2,
+     .width = 9,
+     .height = 21},
+    {.sprite = YellowCar,
+     .goal_percent = 60,
+     .lane = 1,
+     .width = CAR_WIDTH,
+     .height = CAR_HEIGHT},
+    {.sprite = BlueCar,
+     .goal_percent = 65,
+     .lane = 0,
+     .width = CAR_WIDTH,
+     .height = CAR_HEIGHT},
+    {.sprite = BlueCar,
+     .goal_percent = 70,
+     .lane = 2,
+     .width = CAR_WIDTH,
+     .height = CAR_HEIGHT},
+    {.sprite = Truck,
+     .goal_percent = 75,
+     .lane = 1,
+     .width = 9,
+     .height = 21},
+    {.sprite = YellowCar,
+     .goal_percent = 80,
+     .lane = 0,
+     .width = CAR_WIDTH,
+     .height = CAR_HEIGHT},
+    {.sprite = BlueCar,
+     .goal_percent = 85,
+     .lane = 2,
+     .width = CAR_WIDTH,
+     .height = CAR_HEIGHT},
+    {.sprite = BlueCar,
+     .goal_percent = 90,
+     .lane = 1,
+     .width = CAR_WIDTH,
+     .height = CAR_HEIGHT},
+};
+
+// Todo el estado de una carrera: asi se puede reiniciar desde el menu.
+typedef struct {
+  uint8_t player_x;
+  uint8_t player_y;
+  uint8_t player_speed;
+  uint8_t player_moving_forward;
+  uint8_t frame_movement_pixels;
+  uint32_t player_velocity_milli;
+  uint32_t velocity_sum_milli;
+  uint32_t player_movement_remainder;
+  unsigned collisions;
+  uint8_t fence_scroll;
+  uint8_t line_scroll;
+  uint8_t game_finished;
+  uint8_t player_crash_timer;
+  uint32_t player_distance_units;
+  uint32_t distance_progress_remainder;
+  uint32_t elapsed_ms;
+  uint16_t moving_fences[SCREEN_SIZE * SCREEN_SIZE];
+  uint16_t moving_lines[SCREEN_SIZE * SCREEN_SIZE];
+  TrafficCar traffic[TRAFFIC_COUNT];
+} Race;
+
+static void initRace(Race *r) {
+  memset(r, 0, sizeof(*r));
+  r->player_x = lane_x[1];
+  r->player_y = PLAYER_Y;
+  r->player_moving_forward = 1;
+  memcpy(r->traffic, traffic_template, sizeof(r->traffic));
+  for (int i = 0; i < TRAFFIC_COUNT; ++i) {
+    r->traffic[i].road_position_units =
+        (uint16_t)(DISTANCE_GOAL_METERS * DISTANCE_UNITS_PER_METER *
+                   r->traffic[i].goal_percent / 100);
+    r->traffic[i].speed = TRAFFIC_MIN_SPEED;
+    r->traffic[i].y = (int16_t)(PLAYER_Y - r->traffic[i].road_position_units /
+                                               DISTANCE_UNITS_PER_PIXEL);
+  }
+  scrollOverlay(fences, r->moving_fences, 0);
+  scrollOverlay(roadLines, r->moving_lines, 0);
+}
+
+// Punto de enganche con el menu general de KUBIX: menu/ ejecuta este juego
+// como programa aparte, asi que volver al menu general termina el programa.
+static void backToGeneralMenu(int *running) { *running = 0; }
+
+static const char *const menu_labels[MENU_COUNT] = {"SINGLEPLAYER", "TUTORIAL",
+                                                    "SCORES", "EXIT"};
+
+// Los 5 mejores tiempos (segundos, de menor a mayor); 0 = casilla vacia.
+static uint16_t top_times[TOP_N];
+
+// Inserta el tiempo en la tabla; 1 si entro al top.
+static int registerTime(uint16_t top[TOP_N], uint16_t seconds) {
+  int i = TOP_N - 1;
+  if (top[i] != 0 && seconds >= top[i])
+    return 0;
+  while (i > 0 && (top[i - 1] == 0 || top[i - 1] > seconds)) {
+    top[i] = top[i - 1];
+    --i;
+  }
+  top[i] = seconds;
+  return 1;
+}
+
+// Todo en cero = negro.
+static const uint16_t black_pixels[SCREEN_SIZE * BLACK_H];
+
+// Flecha del menu (naranja, como el titulo); 0x0843 es el color transparente.
+#define OR 0xFC00
+#define TR 0x0843
+static const uint16_t menu_cursor[3 * 5] = {OR, TR, TR, OR, OR, TR, OR, OR,
+                                            OR, OR, OR, TR, OR, TR, TR};
+#undef OR
+#undef TR
+
+static void drawText(const char *text, uint8_t x, uint8_t y) {
+  sendString((char *)text, x, y, CHAR_W, CHAR_H);
+}
+
+static void drawCentered(const char *text, uint8_t y) {
+  int width = (int)strlen(text) * (CHAR_W + 1) - 1;
+  drawText(text, (uint8_t)((SCREEN_SIZE - width) / 2), y);
+}
+
+// Texto en la fuente 5x7 (6 px por caracter), para lo que la 3x5 no resuelve.
+static void drawBig(const char *text, uint8_t y) {
+  int width = (int)strlen(text) * (BIG_W + 1) - 1;
+  sendString((char *)text, (uint8_t)((SCREEN_SIZE - width) / 2), y, BIG_W,
+             BIG_H);
+}
+
+static void drawMenu(int selected) {
+  sendBackground(MainMenu);
+  // El fondo trae tres iconos de modos de juego: se borran y se escribe la
+  // lista del diagrama (la misma de Pong y Tetris), con la flecha en la elegida.
+  sendSprite(black_pixels, 0, MENU_CLEAR_Y, SCREEN_SIZE,
+             SCREEN_SIZE - MENU_CLEAR_Y);
+  for (int i = 0; i < MENU_COUNT; ++i) {
+    uint8_t y = (uint8_t)(MENU_LIST_Y + i * MENU_STEP);
+    if (i == selected)
+      sendSprite(menu_cursor, MENU_CURSOR_X, y, 3, 5);
+    drawText(menu_labels[i], MENU_TEXT_X, y);
+  }
+}
+
+static void drawTutorial(void) {
+  drawBig("CONTROLS", 1);
+  drawBig("UP: GAS", 10);
+  drawBig("DOWN: SLOW", 19);
+  drawBig("L R: LANE", 28);
+  drawBig("START:", 37);
+  drawBig("PAUSE", 46);
+  drawBig("B: BACK", 55);
+}
+
+static void drawScores(void) {
+  char line[16];
+  drawCentered("TOP 5", 3);
+  for (int i = 0; i < TOP_N; ++i) {
+    if (top_times[i] > 0)
+      snprintf(line, sizeof(line), "%d. %02u:%02u", i + 1,
+               (unsigned)(top_times[i] / 60), (unsigned)(top_times[i] % 60));
+    else
+      snprintf(line, sizeof(line), "%d. --:--", i + 1);
+    drawBig(line, (uint8_t)(12 + i * 9));
+  }
+  drawCentered("B: BACK", 58);
+}
+
 int main(int argc, char *argv[]) {
   if (initScreen(argc, argv) != 0)
     return 1;
 
   int running = 1;
-  uint8_t player_x = lane_x[1];
-  uint8_t player_y = PLAYER_Y;
-  uint8_t player_speed = 0;
-  uint8_t player_moving_forward = 1;
-  uint8_t frame_movement_pixels = 0;
-  uint32_t player_velocity_milli = 0;
-  uint32_t velocity_sum_milli = 0;
-  uint32_t player_movement_remainder = 0;
-  unsigned collisions = 0;
-  uint8_t fence_scroll = 0;
-  uint8_t line_scroll = 0;
-  uint8_t game_finished = 0;
-  uint8_t player_crash_timer = 0;
-  uint32_t player_distance_units = 0;
-  uint32_t distance_progress_remainder = 0;
-  uint32_t elapsed_ms = 0;
+  static Race race;
+  AppScreen current_screen = SCREEN_STARTMENU;
+  int menu_selected = MENU_SINGLEPLAYER;
+  int finish_wait = 0;
+  uint8_t previous = 0;
   uint32_t last_frame_ticks = SDL_GetTicks();
-  uint16_t moving_fences[SCREEN_SIZE * SCREEN_SIZE];
-  uint16_t moving_lines[SCREEN_SIZE * SCREEN_SIZE];
-  AppScreen current_screen = SCREEN_GAME;
-
-  // FEATURE: I want the cars to be at a random position.
-  TrafficCar traffic[TRAFFIC_COUNT] = {
-      {.sprite = BlueCar,
-       .goal_percent = 5,
-       .lane = 0,
-       .width = CAR_WIDTH,
-       .height = CAR_HEIGHT},
-      {.sprite = YellowCar,
-       .goal_percent = 10,
-       .lane = 2,
-       .width = CAR_WIDTH,
-       .height = CAR_HEIGHT},
-      {.sprite = Truck,
-       .goal_percent = 15,
-       .lane = 1,
-       .width = 9,
-       .height = 21},
-      {.sprite = YellowCar,
-       .goal_percent = 20,
-       .lane = 0,
-       .width = CAR_WIDTH,
-       .height = CAR_HEIGHT},
-      {.sprite = BlueCar,
-       .goal_percent = 25,
-       .lane = 2,
-       .width = CAR_WIDTH,
-       .height = CAR_HEIGHT},
-      {.sprite = BlueCar,
-       .goal_percent = 30,
-       .lane = 1,
-       .width = CAR_WIDTH,
-       .height = CAR_HEIGHT},
-      {.sprite = Truck,
-       .goal_percent = 35,
-       .lane = 0,
-       .width = 9,
-       .height = 21},
-      {.sprite = YellowCar,
-       .goal_percent = 40,
-       .lane = 2,
-       .width = CAR_WIDTH,
-       .height = CAR_HEIGHT},
-      {.sprite = BlueCar,
-       .goal_percent = 45,
-       .lane = 1,
-       .width = CAR_WIDTH,
-       .height = CAR_HEIGHT},
-      {.sprite = BlueCar,
-       .goal_percent = 50,
-       .lane = 0,
-       .width = CAR_WIDTH,
-       .height = CAR_HEIGHT},
-      {.sprite = Truck,
-       .goal_percent = 55,
-       .lane = 2,
-       .width = 9,
-       .height = 21},
-      {.sprite = YellowCar,
-       .goal_percent = 60,
-       .lane = 1,
-       .width = CAR_WIDTH,
-       .height = CAR_HEIGHT},
-      {.sprite = BlueCar,
-       .goal_percent = 65,
-       .lane = 0,
-       .width = CAR_WIDTH,
-       .height = CAR_HEIGHT},
-      {.sprite = BlueCar,
-       .goal_percent = 70,
-       .lane = 2,
-       .width = CAR_WIDTH,
-       .height = CAR_HEIGHT},
-      {.sprite = Truck,
-       .goal_percent = 75,
-       .lane = 1,
-       .width = 9,
-       .height = 21},
-      {.sprite = YellowCar,
-       .goal_percent = 80,
-       .lane = 0,
-       .width = CAR_WIDTH,
-       .height = CAR_HEIGHT},
-      {.sprite = BlueCar,
-       .goal_percent = 85,
-       .lane = 2,
-       .width = CAR_WIDTH,
-       .height = CAR_HEIGHT},
-      {.sprite = BlueCar,
-       .goal_percent = 90,
-       .lane = 1,
-       .width = CAR_WIDTH,
-       .height = CAR_HEIGHT},
-  };
-  for (int i = 0; i < TRAFFIC_COUNT; ++i) {
-    traffic[i].road_position_units =
-        (uint16_t)(DISTANCE_GOAL_METERS * DISTANCE_UNITS_PER_METER *
-                   traffic[i].goal_percent / 100);
-    traffic[i].speed = TRAFFIC_MIN_SPEED;
-    traffic[i].y = (int16_t)(PLAYER_Y - traffic[i].road_position_units /
-                                            DISTANCE_UNITS_PER_PIXEL);
-  }
-  scrollOverlay(fences, moving_fences, 0);
-  scrollOverlay(roadLines, moving_lines, 0);
+  initRace(&race);
 
   while (running) {
     uint32_t frame_ticks = SDL_GetTicks();
     uint32_t frame_delta = frame_ticks - last_frame_ticks;
     last_frame_ticks = frame_ticks;
     uint8_t controls = readControls(&running, &default_keys);
+    // En los menus solo cuenta el flanco de subida: mantener un boton no lo
+    // repite. En la carrera se usa el estado mantenido.
+    uint8_t pressed = (uint8_t)(controls & ~previous);
+    previous = controls;
+    int confirm = (pressed & (NES_BIT_A | NES_BIT_START)) != 0;
+    int back = (pressed & NES_BIT_B) != 0;
 
     switch (current_screen) {
     case SCREEN_STARTMENU:
-      if (controls & NES_BIT_A)
-        current_screen = SCREEN_GAME;
+      if ((pressed & NES_BIT_UP) && menu_selected > 0)
+        --menu_selected;
+      if ((pressed & NES_BIT_DOWN) && menu_selected < MENU_COUNT - 1)
+        ++menu_selected;
+      if (back) {
+        backToGeneralMenu(&running);
+      } else if (confirm) {
+        switch (menu_selected) {
+        case MENU_SINGLEPLAYER:
+          initRace(&race);
+          finish_wait = 0;
+          current_screen = SCREEN_GAME;
+          break;
+        case MENU_TUTORIAL:
+          current_screen = SCREEN_TUTORIAL;
+          break;
+        case MENU_SCORES:
+          current_screen = SCREEN_SCORES;
+          break;
+        default:
+          backToGeneralMenu(&running);
+          break;
+        }
+      }
       break;
 
+    case SCREEN_TUTORIAL:
+    case SCREEN_SCORES:
+      if (back || confirm)
+        current_screen = SCREEN_STARTMENU;
       break;
+
     case SCREEN_PAUSE:
-      if (controls & NES_BIT_A) {
+      if (pressed & NES_BIT_A) {
         current_screen = SCREEN_GAME;
-      } else if (controls & NES_BIT_B) {
+      } else if (back) {
         current_screen = SCREEN_STARTMENU;
       }
       break;
 
     case SCREEN_GAME:
-      if (controls & NES_BIT_START) {
+      if (race.game_finished && finish_wait > 0)
+        --finish_wait;
+      if (race.game_finished && finish_wait == 0 &&
+          (pressed & (NES_BIT_A | NES_BIT_B))) {
+        current_screen = SCREEN_STARTMENU;
+      } else if (controls & NES_BIT_START) {
         current_screen = SCREEN_PAUSE;
       } else {
-        if (!game_finished) {
-          elapsed_ms += frame_delta;
-          updatePlayer(controls, &player_x, &player_y, &player_speed,
-                       &player_moving_forward, frame_delta,
-                       &player_velocity_milli,
-                       &player_movement_remainder,
-                       &velocity_sum_milli,
-                       &frame_movement_pixels);
-          if (player_moving_forward) {
+        if (!race.game_finished) {
+          race.elapsed_ms += frame_delta;
+          updatePlayer(controls, &race.player_x, &race.player_y,
+                       &race.player_speed, &race.player_moving_forward,
+                       frame_delta, &race.player_velocity_milli,
+                       &race.player_movement_remainder,
+                       &race.velocity_sum_milli, &race.frame_movement_pixels);
+          if (race.player_moving_forward) {
             uint32_t goal_units =
                 DISTANCE_GOAL_METERS * DISTANCE_UNITS_PER_METER;
-            distance_progress_remainder +=
-                velocity_sum_milli * frame_delta *
+            race.distance_progress_remainder +=
+                race.velocity_sum_milli * frame_delta *
                 DISTANCE_UNITS_PER_PIXEL;
-            player_distance_units += distance_progress_remainder / 2000000;
-            distance_progress_remainder %= 2000000;
-            if (player_distance_units > goal_units)
-              player_distance_units = goal_units;
+            race.player_distance_units +=
+                race.distance_progress_remainder / 2000000;
+            race.distance_progress_remainder %= 2000000;
+            if (race.player_distance_units > goal_units)
+              race.player_distance_units = goal_units;
           }
 
-          if (player_distance_units >=
+          if (race.player_distance_units >=
               DISTANCE_GOAL_METERS * DISTANCE_UNITS_PER_METER) {
-            game_finished = 1;
+            race.game_finished = 1;
+            registerTime(top_times, (uint16_t)(race.elapsed_ms / 1000));
+            finish_wait = FINISH_WAIT;
           }
 
-          advanceScroll(&fence_scroll, frame_movement_pixels, 1);
-          advanceScroll(&line_scroll, frame_movement_pixels, 1);
+          advanceScroll(&race.fence_scroll, race.frame_movement_pixels, 1);
+          advanceScroll(&race.line_scroll, race.frame_movement_pixels, 1);
         }
-        updateTraffic(traffic, player_x, player_y, player_distance_units,
-                      &collisions, &player_crash_timer, !game_finished);
-        scrollOverlay(fences, moving_fences, fence_scroll);
-        scrollOverlay(roadLines, moving_lines, line_scroll);
+        updateTraffic(race.traffic, race.player_x, race.player_y,
+                      race.player_distance_units, &race.collisions,
+                      &race.player_crash_timer, !race.game_finished);
+        scrollOverlay(fences, race.moving_fences, race.fence_scroll);
+        scrollOverlay(roadLines, race.moving_lines, race.line_scroll);
       }
       break;
 
@@ -397,15 +571,24 @@ int main(int argc, char *argv[]) {
 
     switch (current_screen) {
     case SCREEN_STARTMENU:
-      sendBackground(MainMenu);
+      drawMenu(menu_selected);
+      break;
+    case SCREEN_TUTORIAL:
+      drawTutorial();
+      break;
+    case SCREEN_SCORES:
+      drawScores();
       break;
     case SCREEN_PAUSE:
       sendBackground(PauseMenu);
       break;
     case SCREEN_GAME:
-      drawGame(player_x, player_y, traffic, elapsed_ms / 1000,
-               player_distance_units / DISTANCE_UNITS_PER_METER, game_finished,
-               player_crash_timer, moving_fences, moving_lines);
+      drawGame(race.player_x, race.player_y, race.traffic,
+               race.elapsed_ms / 1000,
+               race.player_distance_units / DISTANCE_UNITS_PER_METER,
+               race.game_finished, race.game_finished && finish_wait == 0,
+               race.player_crash_timer, race.moving_fences,
+               race.moving_lines);
       break;
     case SCREEN_SETTINGS:
       sendBackground(Road);

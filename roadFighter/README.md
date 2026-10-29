@@ -17,8 +17,8 @@ En esta versión para KUBIX el auto acelera, frena y cambia de carril entre el t
 - Tráfico de 18 vehículos (autos azules, autos amarillos y camiones) repartidos a lo largo del recorrido.
 - Detección de colisiones con el tráfico: el auto se muestra destruido unos instantes.
 - Cronómetro (minutos y segundos) y contador de distancia en metros.
-- Meta a los 200 metros: aparece el mensaje *FINISH* y el tiempo se detiene.
-- Pantalla de pausa y pantalla de inicio.
+- Meta a los 200 metros: aparece el mensaje *FINISH*, el tiempo se detiene y con A o B se vuelve al menú.
+- Menú de inicio con Singleplayer, Tutorial, Scores y Exit (como en el diagrama), pantalla de pausa y tabla de los 5 mejores tiempos.
 - Sistema visual basado en sprites.
 
 ## Objetivo
@@ -40,15 +40,17 @@ Durante el recorrido, el jugador debe:
 | Mover hacia la izquierda | Flecha izquierda |
 | Mover hacia la derecha | Flecha derecha |
 | Pausar la partida | Enter |
-| Reanudar (en la pausa) o jugar (en la pantalla de inicio) | Tecla A |
-| Salir de la pausa a la pantalla de inicio | Tecla B |
+| Elegir una opción del menú | Flechas arriba y abajo |
+| Confirmar en el menú, reanudar en la pausa o volver desde la meta | Tecla A (en el menú también Enter) |
+| Volver al menú desde la pausa, el tutorial o los tiempos | Tecla B |
 
 ## Pantallas
 
-1. **Partida:** el juego arranca directamente en la carretera. A la derecha se ven el tiempo (minutos y segundos) y la distancia en metros.
-2. **Pausa:** con Enter durante la partida. A reanuda y B sale a la pantalla de inicio.
-3. **Pantalla de inicio:** el logotipo con los modos 1 PLAYER, 2 PLAYER y MULTIPLAYER; con A se vuelve a la partida. Hoy es solo una imagen: no se puede elegir un modo.
-4. **Meta:** al llegar a los 200 metros aparece *FINISH* y el tiempo queda congelado.
+1. **Menú:** SINGLEPLAYER, TUTORIAL, SCORES y EXIT, como en el diagrama. No tiene Multiplayer porque el juego es de un solo jugador. EXIT (o B) termina el programa y con eso se vuelve al menú de KUBIX.
+2. **Partida:** SINGLEPLAYER empieza una carrera nueva desde cero. A la derecha se ven el tiempo (minutos y segundos) y la distancia en metros.
+3. **Pausa:** con Enter durante la partida. A reanuda y B vuelve al menú (la carrera se abandona).
+4. **Meta:** al llegar a los 200 metros aparece *FINISH*, el tiempo queda congelado y, tras un instante, la pista *A: BACK*. El tiempo entra en la tabla si está entre los 5 mejores.
+5. **Tutorial y Scores:** TUTORIAL muestra los controles y SCORES los 5 mejores tiempos (se guardan en memoria mientras corre el juego).
 
 | Menú | Pausa | Meta |
 | :---: | :---: | :---: |
@@ -64,7 +66,7 @@ El juego usa los sprites de [`roadFighter/assets`](./assets), convertidos a `inc
 
 | Asset | Uso |
 |---|---|
-| `MainMenu` | Pantalla de inicio. |
+| `MainMenu` | Fondo del menú (el título; los iconos de modos que trae se tapan y se escribe la lista de opciones). |
 | `PauseMenu` | Pantalla de pausa. |
 | `SimplerRoad` | Fondo de la carretera. |
 | `fences`, `roadLines` | Vallas y líneas que se desplazan sobre la carretera. |
@@ -110,7 +112,6 @@ El proyecto se compila con CMake y SDL2. Para obtener información sobre la comp
 
 - Los choques solo muestran el auto destruido: todavía no restan velocidad, vidas ni puntos.
 - El tráfico va a velocidad constante y en posiciones fijas; no hay combustible ni varias etapas.
-- No hay modo de 2 jugadores ni MULTIPLAYER, y la pantalla de inicio no permite elegir un modo.
-- No hay puntaje ni lista de mejores tiempos.
-- Al llegar a la meta no hay pantalla de fin ni forma de reiniciar la carrera sin cerrar el programa.
-- Salir de la pausa lleva a la pantalla de inicio, pero todavía no se vuelve al menú general de KUBIX: ver [`menu`](../menu).
+- No hay modo de 2 jugadores, por eso el menú no tiene Multiplayer.
+- Los mejores tiempos se guardan solo en memoria mientras corre el juego y no piden nombre.
+- EXIT y B en el menú terminan el programa; el menú general de KUBIX (ver [`menu`](../menu)) lo vuelve a mostrar.
