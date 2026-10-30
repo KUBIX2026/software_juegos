@@ -180,12 +180,14 @@ namespace Kubix
     {
         readonly string root;
         readonly Tile[] tiles;
-        Label summary;
-        int selected;
+        Label summary, sub, help;
+        Panel header, grid, canvas, footer;
+        Button[] buttons;
+        int selected, cols = 3;
         Process running;
         Tile runningTile;
 
-        const int TileW = 320, TileH = 240, Gap = 12, Margin2 = 16, HeaderH = 76;
+        const int TileW = 320, TileH = 240, Gap = 12, Margin2 = 16, HeaderH = 76, FooterH = 96, MinTileW = 300, MaxTileW = 460;
 
         public MainForm(string root)
         {
@@ -194,12 +196,38 @@ namespace Kubix
             BackColor = Theme.Bg;
             ForeColor = Theme.Text;
             Font = new Font("Segoe UI", 9f);
-            FormBorderStyle = FormBorderStyle.FixedSingle;
-            MaximizeBox = false;
+            FormBorderStyle = FormBorderStyle.Sizable;
+            MaximizeBox = true;
+            MinimizeBox = true;
             StartPosition = FormStartPosition.CenterScreen;
-            ClientSize = new Size(3 * TileW + 2 * Gap + 2 * Margin2, HeaderH + 2 * TileH + Gap + 10 + 96);
+            ClientSize = new Size(3 * TileW + 2 * Gap + 2 * Margin2, HeaderH + 2 * TileH + Gap + 10 + FooterH);
+            MinimumSize = new Size(Width - ClientSize.Width + 700, Height - ClientSize.Height + 420);
             KeyPreview = true;
             try { Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); } catch (Exception) { }
+
+            // las tres zonas se acomodan solas al tamano de la ventana: cabecera arriba, pie abajo y los juegos en medio
+            grid = new Panel();
+            grid.Dock = DockStyle.Fill;
+            grid.AutoScroll = true;
+            grid.BackColor = Theme.Bg;
+            canvas = new Panel();
+            canvas.BackColor = Theme.Bg;
+            grid.Controls.Add(canvas);
+
+            header = new Panel();
+            header.Dock = DockStyle.Top;
+            header.Height = HeaderH;
+            header.BackColor = Theme.Bg;
+
+            footer = new Panel();
+            footer.Dock = DockStyle.Bottom;
+            footer.Height = FooterH;
+            footer.BackColor = Theme.Bg;
+
+            Controls.Add(grid);
+            Controls.Add(header);
+            Controls.Add(footer);
+            grid.BringToFront();
 
             Label title = new Label();
             title.Text = "KUBIX";
@@ -207,23 +235,22 @@ namespace Kubix
             title.ForeColor = Theme.Accent;
             title.AutoSize = true;
             title.Location = new Point(Margin2, 10);
-            Controls.Add(title);
+            header.Controls.Add(title);
 
-            Label sub = new Label();
+            sub = new Label();
             sub.Text = "Software de juegos  ·  haz clic en un juego para jugarlo";
             sub.Font = new Font("Segoe UI", 11f);
             sub.ForeColor = Theme.Muted;
             sub.AutoSize = true;
             sub.Location = new Point(Margin2 + 150, 28);
-            Controls.Add(sub);
+            header.Controls.Add(sub);
 
             summary = new Label();
             summary.Font = new Font("Segoe UI", 10f, FontStyle.Bold);
             summary.AutoSize = false;
             summary.TextAlign = ContentAlignment.MiddleRight;
             summary.Size = new Size(260, 24);
-            summary.Location = new Point(ClientSize.Width - Margin2 - 260, 30);
-            Controls.Add(summary);
+            header.Controls.Add(summary);
 
             tiles = new Tile[Locator.Games.Length];
             for (int i = 0; i < tiles.Length; i++)
@@ -231,33 +258,76 @@ namespace Kubix
                 Game game = Locator.Games[i];
                 Tile t = new Tile(game, LoadPicture(game));
                 t.Size = new Size(TileW, TileH);
-                t.Location = new Point(Margin2 + (i % 3) * (TileW + Gap), HeaderH + (i / 3) * (TileH + Gap));
                 int index = i;
                 t.Click += delegate { SelectTile(index); Launch(Locator.Games[index]); };
-                Controls.Add(t);
+                canvas.Controls.Add(t);
                 tiles[i] = t;
             }
 
-            int by = HeaderH + 2 * TileH + Gap + 10;
-            Label help = new Label();
+            help = new Label();
             help.Text = "Teclado = control NES:  Flechas = mover  ·  Enter = Start  ·  tecla A = botón A  ·  tecla B = botón B.\r\n" +
                         "Para salir de un juego usa su opción Exit o cierra su ventana: esta pantalla vuelve sola.";
             help.ForeColor = Theme.Muted;
             help.AutoSize = false;
             help.Size = new Size(ClientSize.Width - 2 * Margin2, 40);
-            help.Location = new Point(Margin2, by + 2);
-            Controls.Add(help);
+            help.Location = new Point(Margin2, 2);
+            footer.Controls.Add(help);
 
-            int bx = ClientSize.Width - Margin2;
-            bx = AddButton("Abrir carpeta", bx, by + 44, OpenFolder);
-            bx = AddButton("Compilar / actualizar", bx, by + 44, Compile);
-            AddButton("Menú KUBIX (consola)", bx, by + 44, delegate { Launch(Locator.Menu); });
+            buttons = new Button[3];
+            buttons[2] = AddButton("Abrir carpeta", OpenFolder);
+            buttons[1] = AddButton("Compilar / actualizar", Compile);
+            buttons[0] = AddButton("Menú KUBIX (consola)", delegate { Launch(Locator.Menu); });
+
+            grid.Resize += delegate { ArrangeTiles(); };
+            header.Resize += delegate { ArrangeHeader(); };
+            footer.Resize += delegate { ArrangeFooter(); };
+            ArrangeHeader();
+            ArrangeFooter();
+            ArrangeTiles();
 
             SelectTile(0);
             RefreshStatus();
         }
 
-        int AddButton(string text, int right, int y, EventHandler onClick)
+        // 3, 2 o 1 columnas segun el ancho; si no caben todas las filas aparece la barra de desplazamiento
+        void ArrangeTiles()
+        {
+            int width = grid.ClientSize.Width;
+            int rows = 0;
+            for (int pass = 0; pass < 2; pass++)
+            {
+                cols = Math.Max(1, Math.Min(3, (width - 2 * Margin2 + Gap) / (MinTileW + Gap)));
+                rows = (tiles.Length + cols - 1) / cols;
+                // si las filas no caben aparece la barra vertical, que le quita ancho a la zona: se descuenta antes
+                bool needsBar = rows * TileH + (rows - 1) * Gap + 8 > grid.ClientSize.Height;
+                if (pass == 0 && needsBar && !grid.VerticalScroll.Visible) width -= SystemInformation.VerticalScrollBarWidth;
+                else break;
+            }
+            int tw = Math.Min(MaxTileW, (width - 2 * Margin2 - (cols - 1) * Gap) / cols);
+            int x0 = Math.Max(Margin2, (width - (cols * tw + (cols - 1) * Gap)) / 2);
+            canvas.SetBounds(0, 0, width, rows * TileH + (rows - 1) * Gap + 8);
+            for (int i = 0; i < tiles.Length; i++)
+                tiles[i].SetBounds(x0 + (i % cols) * (tw + Gap), (i / cols) * (TileH + Gap), tw, TileH);
+        }
+
+        void ArrangeHeader()
+        {
+            summary.Location = new Point(header.ClientSize.Width - Margin2 - summary.Width, 30);
+            sub.Visible = header.ClientSize.Width >= 980;
+        }
+
+        void ArrangeFooter()
+        {
+            help.Width = Math.Max(100, footer.ClientSize.Width - 2 * Margin2);
+            int bx = footer.ClientSize.Width - Margin2;
+            foreach (Button b in buttons)
+            {
+                b.Location = new Point(bx - b.Width, 46);
+                bx -= b.Width + 10;
+            }
+        }
+
+        Button AddButton(string text, EventHandler onClick)
         {
             Button b = new Button();
             b.Text = text;
@@ -267,12 +337,11 @@ namespace Kubix
             b.BackColor = Theme.Panel;
             b.ForeColor = Theme.Text;
             b.Size = new Size(text.Length * 8 + 28, 34);
-            b.Location = new Point(right - b.Width, y);
             b.Cursor = Cursors.Hand;
             b.TabStop = false;
             b.Click += onClick;
-            Controls.Add(b);
-            return right - b.Width - 10;
+            footer.Controls.Add(b);
+            return b;
         }
 
         Image LoadPicture(Game g)
@@ -320,8 +389,8 @@ namespace Kubix
             {
                 case Keys.Left: SelectTile(selected - 1); return true;
                 case Keys.Right: SelectTile(selected + 1); return true;
-                case Keys.Up: SelectTile(selected - 3); return true;
-                case Keys.Down: SelectTile(selected + 3); return true;
+                case Keys.Up: SelectTile(selected - cols); return true;
+                case Keys.Down: SelectTile(selected + cols); return true;
                 case Keys.Enter: Launch(Locator.Games[selected]); return true;
                 case Keys.F5: RefreshStatus(); return true;
                 case Keys.M: Launch(Locator.Menu); return true;
