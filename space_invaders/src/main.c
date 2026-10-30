@@ -139,6 +139,17 @@ typedef struct {
   uint8_t timer;
 } Explosion;
 
+// Sonidos que pide la logica en cada paso; main los toca y los limpia.
+enum {
+  SND_SHOT = 1 << 0,
+  SND_ALIEN_HIT = 1 << 1,
+  SND_SAUCER_HIT = 1 << 2,
+  SND_SAUCER = 1 << 3,
+  SND_SHIP_HIT = 1 << 4,
+  SND_MARCH = 1 << 5,
+  SND_WAVE = 1 << 6
+};
+
 typedef struct {
   uint8_t players;
   Ship ships[2];
@@ -155,6 +166,8 @@ typedef struct {
   uint8_t dying_ship;
   uint16_t ticks;
   uint32_t rng;
+  uint16_t sounds;
+  uint8_t march_note; // cual de los 4 golpes de la marcha toca
 } Game;
 
 // Segundo control: J/L para moverse, I o K para disparar.
@@ -184,6 +197,26 @@ static const char *const menu_labels[MENU_COUNT] = {
 
 // Los 5 mejores puntajes de una partida de un jugador (solo en memoria).
 static uint16_t top_scores[TOP_N];
+
+// Sonidos (WAV en assets/, se leen desde build/). Un id invalido no suena.
+static SoundID snd_menu, snd_ok, snd_shot, snd_alien, snd_saucer_hit, snd_saucer,
+    snd_ship, snd_wave, snd_over, snd_march[4];
+
+static void loadSounds(void) {
+  snd_menu = initSound("../assets/invaders_menu.wav");
+  snd_ok = initSound("../assets/invaders_aceptar.wav");
+  snd_shot = initSound("../assets/invaders_disparo.wav");
+  snd_alien = initSound("../assets/invaders_alien.wav");
+  snd_saucer_hit = initSound("../assets/invaders_ovni_golpe.wav");
+  snd_saucer = initSound("../assets/invaders_ovni.wav");
+  snd_ship = initSound("../assets/invaders_nave.wav");
+  snd_wave = initSound("../assets/invaders_oleada.wav");
+  snd_over = initSound("../assets/invaders_fin.wav");
+  snd_march[0] = initSound("../assets/invaders_marcha1.wav");
+  snd_march[1] = initSound("../assets/invaders_marcha2.wav");
+  snd_march[2] = initSound("../assets/invaders_marcha3.wav");
+  snd_march[3] = initSound("../assets/invaders_marcha4.wav");
+}
 
 // Inserta el puntaje en la tabla (de mayor a menor); 1 si entro al top.
 static int registerScore(uint16_t top[TOP_N], uint16_t score) {
@@ -385,6 +418,7 @@ static uint16_t hitAlien(Game *g, int x, int y) {
     return 0;
   f->alive[r][c] = 0;
   --f->alive_count;
+  g->sounds |= SND_ALIEN_HIT;
   addExplosion(g, f->x + c * ALIEN_PITCH_X, f->y + r * ALIEN_PITCH_Y, 0);
   return kind_points[row_kind[r]];
 }
@@ -395,6 +429,7 @@ static uint16_t hitSaucer(Game *g, int x, int y) {
       !overlaps(x, y, 1, 1, u->x, SAUCER_Y, SAUCER_W, SAUCER_H))
     return 0;
   u->active = 0;
+  g->sounds |= SND_SAUCER_HIT;
   u->spawn_timer = saucerDelay(g);
   addExplosion(g, u->x, SAUCER_Y, u->points);
   return u->points;
@@ -441,8 +476,10 @@ static void updateShip(Game *g, int p, uint8_t controls) {
   if (right && !left && s->x < SHIP_MAX_X)
     ++s->x;
   // Un disparo a la vez; mantener el boton dispara apenas se libera.
-  if ((controls & (NES_BIT_A | NES_BIT_UP)) && !s->shot.active)
+  if ((controls & (NES_BIT_A | NES_BIT_UP)) && !s->shot.active) {
     s->shot = (Shot){(int16_t)(s->x + SHIP_W / 2), SHIP_Y - SHOT_H, 1};
+    g->sounds |= SND_SHOT;
+  }
   for (int i = 0; i < SHOT_SPEED && s->shot.active; ++i)
     moveShipShot(g, s);
 }
@@ -468,6 +505,8 @@ static void marchFormation(Game *g) {
     f->x += f->dir;
   }
   f->frame ^= 1;
+  g->march_note = (uint8_t)((g->march_note + 1) & 3);
+  g->sounds |= SND_MARCH;
   aliensEatShields(g);
 }
 
@@ -522,6 +561,7 @@ static void updateAlienFire(Game *g) {
 
 static void killShip(Game *g, int p) {
   --g->ships[p].lives;
+  g->sounds |= SND_SHIP_HIT;
   g->ships[p].shot.active = 0;
   memset(g->alien_shots, 0, sizeof(g->alien_shots));
   g->dying_ship = (uint8_t)p;
@@ -566,6 +606,8 @@ static void updateSaucer(Game *g) {
     }
     return;
   }
+  if (g->ticks % 14 == 0) // el gorjeo dura 0.22 s: se repite mientras cruza
+    g->sounds |= SND_SAUCER;
   if (++u->move_timer < SAUCER_MOVE_TICKS)
     return;
   u->move_timer = 0;
@@ -613,6 +655,7 @@ static int tickGame(Game *g, const uint8_t controls[2]) {
     ++g->wave;
     startWave(g);
     g->phase = PHASE_WAVE_INTRO;
+    g->sounds |= SND_WAVE;
     g->phase_timer = WAVE_INTRO_TICKS;
   }
   return 0;
@@ -807,10 +850,30 @@ static void drawMessage(const char *const lines[2]) {
   drawCentered("B: BACK", 52);
 }
 
+// Toca los sonidos que la logica pidio desde la ultima vez.
+static void playGameSounds(Game *g) {
+  if (g->sounds & SND_SHOT)
+    playSound(snd_shot);
+  if (g->sounds & SND_ALIEN_HIT)
+    playSound(snd_alien);
+  if (g->sounds & SND_SAUCER_HIT)
+    playSound(snd_saucer_hit);
+  if (g->sounds & SND_SAUCER)
+    playSound(snd_saucer);
+  if (g->sounds & SND_SHIP_HIT)
+    playSound(snd_ship);
+  if (g->sounds & SND_MARCH)
+    playSound(snd_march[g->march_note]);
+  if (g->sounds & SND_WAVE)
+    playSound(snd_wave);
+  g->sounds = 0;
+}
+
 int main(int argc, char *argv[]) {
   if (initScreen(argc, argv) != 0)
     return 1;
   prepareSprites();
+  loadSounds();
 
   static Game game;
   static const char *const controls_message[2] = {"NEED 2", "CONTROLS"};
@@ -839,13 +902,18 @@ int main(int argc, char *argv[]) {
 
     switch (current_screen) {
     case SCREEN_STARTMENU:
-      if ((pressed & NES_BIT_UP) && menu_selected > 0)
+      if ((pressed & NES_BIT_UP) && menu_selected > 0) {
         --menu_selected;
-      if ((pressed & NES_BIT_DOWN) && menu_selected < MENU_COUNT - 1)
+        playSound(snd_menu);
+      }
+      if ((pressed & NES_BIT_DOWN) && menu_selected < MENU_COUNT - 1) {
         ++menu_selected;
+        playSound(snd_menu);
+      }
       if (back) {
         backToGeneralMenu(&running);
       } else if (confirm) {
+        playSound(snd_ok);
         switch (menu_selected) {
         case MENU_SINGLEPLAYER:
           initGame(&game, 1, frame_ticks);
@@ -876,14 +944,17 @@ int main(int argc, char *argv[]) {
     case SCREEN_MESSAGE:
     case SCREEN_TUTORIAL:
     case SCREEN_SCORES:
-      if (back || confirm)
+      if (back || confirm) {
+        playSound(snd_menu);
         current_screen = SCREEN_STARTMENU;
+      }
       break;
 
     case SCREEN_READY:
       if (back) {
         current_screen = SCREEN_STARTMENU;
       } else if (pressed & NES_BIT_START) {
+        playSound(snd_ok);
         tick_accumulator = 0;
         current_screen = SCREEN_GAME;
       }
@@ -905,9 +976,11 @@ int main(int argc, char *argv[]) {
             registerScore(top_scores, game.ships[0].score);
           gameover_wait = GAMEOVER_WAIT;
           current_screen = SCREEN_GAMEOVER;
+          playSound(snd_over);
           break;
         }
       }
+      playGameSounds(&game);
       break;
     }
 

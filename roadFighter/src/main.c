@@ -368,6 +368,18 @@ static const char *const menu_labels[MENU_COUNT] = {"SINGLEPLAYER", "TUTORIAL",
 // Los 5 mejores tiempos (segundos, de menor a mayor); 0 = casilla vacia.
 static uint16_t top_times[TOP_N];
 
+// Sonidos (WAV en assets/, se leen desde build/). Un id invalido no suena.
+static SoundID snd_menu, snd_ok, snd_start, snd_engine, snd_crash, snd_finish;
+
+static void loadSounds(void) {
+  snd_menu = initSound("../assets/roadfighter_menu.wav");
+  snd_ok = initSound("../assets/roadfighter_aceptar.wav");
+  snd_start = initSound("../assets/roadfighter_arranque.wav");
+  snd_engine = initSound("../assets/roadfighter_motor.wav");
+  snd_crash = initSound("../assets/roadfighter_choque.wav");
+  snd_finish = initSound("../assets/roadfighter_meta.wav");
+}
+
 // Inserta el tiempo en la tabla; 1 si entro al top.
 static int registerTime(uint16_t top[TOP_N], uint16_t seconds) {
   int i = TOP_N - 1;
@@ -449,12 +461,14 @@ static void drawScores(void) {
 int main(int argc, char *argv[]) {
   if (initScreen(argc, argv) != 0)
     return 1;
+  loadSounds();
 
   int running = 1;
   static Race race;
   AppScreen current_screen = SCREEN_STARTMENU;
   int menu_selected = MENU_SINGLEPLAYER;
   int finish_wait = 0;
+  int engine_wait = 0;
   uint8_t previous = 0;
   uint32_t last_frame_ticks = SDL_GetTicks();
   initRace(&race);
@@ -473,17 +487,23 @@ int main(int argc, char *argv[]) {
 
     switch (current_screen) {
     case SCREEN_STARTMENU:
-      if ((pressed & NES_BIT_UP) && menu_selected > 0)
+      if ((pressed & NES_BIT_UP) && menu_selected > 0) {
         --menu_selected;
-      if ((pressed & NES_BIT_DOWN) && menu_selected < MENU_COUNT - 1)
+        playSound(snd_menu);
+      }
+      if ((pressed & NES_BIT_DOWN) && menu_selected < MENU_COUNT - 1) {
         ++menu_selected;
+        playSound(snd_menu);
+      }
       if (back) {
         backToGeneralMenu(&running);
       } else if (confirm) {
+        playSound(menu_selected == MENU_SINGLEPLAYER ? snd_start : snd_ok);
         switch (menu_selected) {
         case MENU_SINGLEPLAYER:
           initRace(&race);
           finish_wait = 0;
+          engine_wait = 0;
           current_screen = SCREEN_GAME;
           break;
         case MENU_TUTORIAL:
@@ -501,8 +521,10 @@ int main(int argc, char *argv[]) {
 
     case SCREEN_TUTORIAL:
     case SCREEN_SCORES:
-      if (back || confirm)
+      if (back || confirm) {
+        playSound(snd_menu);
         current_screen = SCREEN_STARTMENU;
+      }
       break;
 
     case SCREEN_PAUSE:
@@ -529,6 +551,12 @@ int main(int argc, char *argv[]) {
                        frame_delta, &race.player_velocity_milli,
                        &race.player_movement_remainder,
                        &race.velocity_sum_milli, &race.frame_movement_pixels);
+          // El motor late mas seguido cuanto mas rapido va el auto.
+          if (race.player_speed > 0 && race.player_crash_timer == 0 &&
+              --engine_wait <= 0) {
+            playSound(snd_engine);
+            engine_wait = race.player_speed >= 9 ? 3 : 12 - race.player_speed;
+          }
           if (race.player_moving_forward) {
             uint32_t goal_units =
                 DISTANCE_GOAL_METERS * DISTANCE_UNITS_PER_METER;
@@ -545,6 +573,7 @@ int main(int argc, char *argv[]) {
           if (race.player_distance_units >=
               DISTANCE_GOAL_METERS * DISTANCE_UNITS_PER_METER) {
             race.game_finished = 1;
+            playSound(snd_finish);
             registerTime(top_times, (uint16_t)(race.elapsed_ms / 1000));
             finish_wait = FINISH_WAIT;
           }
@@ -552,9 +581,12 @@ int main(int argc, char *argv[]) {
           advanceScroll(&race.fence_scroll, race.frame_movement_pixels, 1);
           advanceScroll(&race.line_scroll, race.frame_movement_pixels, 1);
         }
+        unsigned collisions_before = race.collisions;
         updateTraffic(race.traffic, race.player_x, race.player_y,
                       race.player_distance_units, &race.collisions,
                       &race.player_crash_timer, !race.game_finished);
+        if (race.collisions > collisions_before)
+          playSound(snd_crash);
         scrollOverlay(fences, race.moving_fences, race.fence_scroll);
         scrollOverlay(roadLines, race.moving_lines, race.line_scroll);
       }

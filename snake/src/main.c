@@ -124,6 +124,17 @@ static const char *const menu_labels[MENU_COUNT] = {
 // Los 5 mejores puntajes de una partida de un jugador (solo en memoria).
 static uint16_t top_scores[TOP_N];
 
+// Sonidos (WAV en assets/, se leen desde build/). Un id invalido no suena.
+static SoundID snd_menu, snd_ok, snd_eat, snd_die, snd_win;
+
+static void loadSounds(void) {
+  snd_menu = initSound("../assets/snake_menu.wav");
+  snd_ok = initSound("../assets/snake_aceptar.wav");
+  snd_eat = initSound("../assets/snake_comer.wav");
+  snd_die = initSound("../assets/snake_morir.wav");
+  snd_win = initSound("../assets/snake_ganar.wav");
+}
+
 // Inserta el puntaje en la tabla (de mayor a menor); 1 si entro al top.
 static int registerScore(uint16_t top[TOP_N], uint16_t score) {
   if (score <= top[TOP_N - 1])
@@ -496,6 +507,7 @@ int main(int argc, char *argv[]) {
   if (initScreen(argc, argv) != 0)
     return 1;
   prepareSprites();
+  loadSounds();
 
   static Game game;
   static const char *const controls_message[2] = {"NEED 2", "CONTROLS"};
@@ -527,13 +539,18 @@ int main(int argc, char *argv[]) {
 
     switch (current_screen) {
     case SCREEN_STARTMENU:
-      if ((pressed & NES_BIT_UP) && menu_selected > 0)
+      if ((pressed & NES_BIT_UP) && menu_selected > 0) {
         --menu_selected;
-      if ((pressed & NES_BIT_DOWN) && menu_selected < MENU_COUNT - 1)
+        playSound(snd_menu);
+      }
+      if ((pressed & NES_BIT_DOWN) && menu_selected < MENU_COUNT - 1) {
         ++menu_selected;
+        playSound(snd_menu);
+      }
       if (back) {
         backToGeneralMenu(&running);
       } else if (confirm) {
+        playSound(snd_ok);
         switch (menu_selected) {
         case MENU_SINGLEPLAYER:
           initGame(&game, 1, frame_ticks);
@@ -564,15 +581,19 @@ int main(int argc, char *argv[]) {
     case SCREEN_MESSAGE:
     case SCREEN_TUTORIAL:
     case SCREEN_SCORES:
-      if (back || confirm)
+      if (back || confirm) {
+        playSound(snd_menu);
         current_screen = SCREEN_STARTMENU;
+      }
       break;
 
     case SCREEN_READY:
       if (back)
         current_screen = SCREEN_STARTMENU;
-      else if (pressed & NES_BIT_START)
+      else if (pressed & NES_BIT_START) {
+        playSound(snd_ok);
         current_screen = SCREEN_GAME;
+      }
       break;
 
     case SCREEN_GAME:
@@ -583,7 +604,13 @@ int main(int argc, char *argv[]) {
       readTurns(&game.snakes[0], pressed);
       if (game.players == 2)
         readTurns(&game.snakes[1], pressed2);
-      if (advanceGame(&game, frame_delta)) {
+      unsigned score_before = game.snakes[0].score + game.snakes[1].score;
+      int ended = advanceGame(&game, frame_delta);
+      if (ended)
+        playSound(game.board_full ? snd_win : snd_die);
+      else if (game.snakes[0].score + game.snakes[1].score > score_before)
+        playSound(snd_eat);
+      if (ended) {
         made_best = game.players == 1 && game.snakes[0].score > best_score;
         if (made_best)
           best_score = game.snakes[0].score;

@@ -110,6 +110,16 @@ typedef struct {
   uint16_t speed; // subpixeles por paso
 } Player;
 
+// Sonidos que pide la logica en cada paso; main los toca y los limpia.
+enum {
+  SND_PADDLE = 1 << 0,
+  SND_WALL = 1 << 1,
+  SND_BLOCK = 1 << 2,
+  SND_LAUNCH = 1 << 3,
+  SND_LOST = 1 << 4,
+  SND_LEVEL = 1 << 5
+};
+
 typedef struct {
   uint8_t players;
   uint8_t current; // jugador que tiene el turno
@@ -121,6 +131,8 @@ typedef struct {
   uint8_t held[2]; // botones del paso anterior, para lanzar con un toque nuevo
   uint16_t ticks;
   uint32_t rng;
+  uint16_t sounds;
+  uint8_t block_tone; // 0..2: el tono del ultimo bloque roto
 } Game;
 
 // Segundo control: J/L para moverse, K o I para lanzar.
@@ -151,6 +163,25 @@ static const char *const menu_labels[MENU_COUNT] = {
 
 // Los 5 mejores puntajes de una partida de un jugador (solo en memoria).
 static uint16_t top_scores[TOP_N];
+
+// Sonidos (WAV en assets/, se leen desde build/). Un id invalido no suena.
+static SoundID snd_menu, snd_ok, snd_paddle, snd_wall, snd_launch, snd_lost,
+    snd_level, snd_over, snd_block[3];
+
+static void loadSounds(void) {
+  snd_menu = initSound("../assets/breakout_menu.wav");
+  snd_ok = initSound("../assets/breakout_aceptar.wav");
+  snd_paddle = initSound("../assets/breakout_paleta.wav");
+  snd_wall = initSound("../assets/breakout_pared.wav");
+  snd_launch = initSound("../assets/breakout_lanzar.wav");
+  snd_lost = initSound("../assets/breakout_perder.wav");
+  snd_level = initSound("../assets/breakout_nivel.wav");
+  snd_over = initSound("../assets/breakout_fin.wav");
+  // De la fila de arriba (mas puntos) a la de abajo: del tono mas agudo al mas grave.
+  snd_block[0] = initSound("../assets/breakout_bloque3.wav");
+  snd_block[1] = initSound("../assets/breakout_bloque2.wav");
+  snd_block[2] = initSound("../assets/breakout_bloque1.wav");
+}
 
 // Inserta el puntaje en la tabla (de mayor a menor); 1 si entro al top.
 static int registerScore(uint16_t top[TOP_N], uint16_t score) {
@@ -312,12 +343,16 @@ static int moveBall(Game *g) {
   if (b->x < 0) {
     b->x = -b->x;
     b->sx = 1;
+    g->sounds |= SND_WALL;
   } else if (b->x > max_x) {
     b->x = 2 * max_x - b->x;
     b->sx = -1;
+    g->sounds |= SND_WALL;
   }
   if (findBlock(pl, b->x / SUB, b->y / SUB, &r, &c)) {
     hitBlock(pl, r, c);
+    g->sounds |= SND_BLOCK;
+    g->block_tone = (uint8_t)(r / 2);
     b->x = before;
     b->sx = (int8_t)-b->sx;
   }
@@ -328,22 +363,28 @@ static int moveBall(Game *g) {
   if (b->y < CEILING_Y * SUB) {
     b->y = 2 * CEILING_Y * SUB - b->y;
     b->sy = 1;
+    g->sounds |= SND_WALL;
   }
   if (findBlock(pl, b->x / SUB, b->y / SUB, &r, &c)) {
     hitBlock(pl, r, c);
+    g->sounds |= SND_BLOCK;
+    g->block_tone = (uint8_t)(r / 2);
     b->y = before;
     b->sy = (int8_t)-b->sy;
   } else if (b->sy > 0) {
     int bx = b->x / SUB, px = g->paddle_x / SUB;
     int bottom = b->y / SUB + BALL_SIZE;
     if (old_bottom <= PADDLE_Y && bottom > PADDLE_Y &&
-        overlaps(bx, 0, BALL_SIZE, 1, px, 0, PADDLE_W, 1))
+        overlaps(bx, 0, BALL_SIZE, 1, px, 0, PADDLE_W, 1)) {
       bounceOnPaddle(g);
+      g->sounds |= SND_PADDLE;
+    }
   }
   return b->y / SUB >= SCREEN_SIZE;
 }
 
 static void launchBall(Game *g) {
+  g->sounds |= SND_LAUNCH;
   g->ball.angle = 2;
   g->ball.sx = (int8_t)(nextRandom(&g->rng) & 1 ? 1 : -1);
   g->ball.sy = -1;
@@ -399,10 +440,12 @@ static int tickGame(Game *g, const uint8_t controls[2]) {
     movePaddle(g, held);
     if (moveBall(g)) {
       --pl->lives;
+      g->sounds |= SND_LOST;
       g->phase = PHASE_LOST;
       g->phase_timer = LOST_TICKS;
     } else if (pl->blocks_left == 0) {
       ++pl->level;
+      g->sounds |= SND_LEVEL;
       resetWall(pl);
       ballOnPaddle(g);
       g->phase = PHASE_LEVEL_INTRO;
@@ -572,10 +615,28 @@ static void drawMessage(const char *const lines[2]) {
   drawCentered("B: BACK", 52);
 }
 
+// Toca los sonidos que la logica pidio desde la ultima vez.
+static void playGameSounds(Game *g) {
+  if (g->sounds & SND_PADDLE)
+    playSound(snd_paddle);
+  if (g->sounds & SND_WALL)
+    playSound(snd_wall);
+  if (g->sounds & SND_BLOCK)
+    playSound(snd_block[g->block_tone]);
+  if (g->sounds & SND_LAUNCH)
+    playSound(snd_launch);
+  if (g->sounds & SND_LOST)
+    playSound(snd_lost);
+  if (g->sounds & SND_LEVEL)
+    playSound(snd_level);
+  g->sounds = 0;
+}
+
 int main(int argc, char *argv[]) {
   if (initScreen(argc, argv) != 0)
     return 1;
   prepareSprites();
+  loadSounds();
 
   static Game game;
   static const char *const controls_message[2] = {"NEED 2", "CONTROLS"};
@@ -604,13 +665,18 @@ int main(int argc, char *argv[]) {
 
     switch (current_screen) {
     case SCREEN_STARTMENU:
-      if ((pressed & NES_BIT_UP) && menu_selected > 0)
+      if ((pressed & NES_BIT_UP) && menu_selected > 0) {
         --menu_selected;
-      if ((pressed & NES_BIT_DOWN) && menu_selected < MENU_COUNT - 1)
+        playSound(snd_menu);
+      }
+      if ((pressed & NES_BIT_DOWN) && menu_selected < MENU_COUNT - 1) {
         ++menu_selected;
+        playSound(snd_menu);
+      }
       if (back) {
         backToGeneralMenu(&running);
       } else if (confirm) {
+        playSound(snd_ok);
         switch (menu_selected) {
         case MENU_SINGLEPLAYER:
           initGame(&game, 1, frame_ticks);
@@ -641,14 +707,17 @@ int main(int argc, char *argv[]) {
     case SCREEN_MESSAGE:
     case SCREEN_TUTORIAL:
     case SCREEN_SCORES:
-      if (back || confirm)
+      if (back || confirm) {
+        playSound(snd_menu);
         current_screen = SCREEN_STARTMENU;
+      }
       break;
 
     case SCREEN_READY:
       if (back) {
         current_screen = SCREEN_STARTMENU;
       } else if (pressed & NES_BIT_START) {
+        playSound(snd_ok);
         tick_accumulator = 0;
         current_screen = SCREEN_GAME;
       }
@@ -670,9 +739,11 @@ int main(int argc, char *argv[]) {
             registerScore(top_scores, game.player[0].score);
           gameover_wait = GAMEOVER_WAIT;
           current_screen = SCREEN_GAMEOVER;
+          playSound(snd_over);
           break;
         }
       }
+      playGameSounds(&game);
       break;
     }
 
